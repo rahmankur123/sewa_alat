@@ -2,186 +2,200 @@
     $role = auth()->user()->role ?? null;
 @endphp
 
-<aside class="w-64 min-h-screen bg-indigo-700 text-white shadow-lg">
-    
-    <div class="p-5 border-b border-indigo-500">
-        <h2 class="text-2xl font-bold">Dashboard</h2>
+<aside class="w-64 h-screen bg-slate-900 text-slate-200 flex flex-col shadow-xl">
+
+    <!-- HEADER -->
+    <div class="px-6 py-5 border-b border-slate-800">
+        <h2 class="text-lg font-semibold tracking-wide text-white">
+            Dashboard
+        </h2>
+        <p class="text-xs text-slate-400 mt-1 capitalize">
+            {{ $role }}
+        </p>
     </div>
 
-    <ul class="p-4 space-y-2">
+    <!-- MENU -->
+    <nav class="flex-1 overflow-y-auto px-4 py-4 space-y-1 text-sm">
 
-        {{-- HOME --}}
-        <li>
-            <a href="/dashboard"
-               class="flex items-center gap-3 p-2 rounded hover:bg-indigo-600 transition">
-                <span>🏠</span> Home
-            </a>
-        </li>
+        <!-- HOME -->
+        <a href="/dashboard"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span>🏠</span>
+            <span>Home</span>
+        </a>
 
-        {{-- PEMILIK --}}
+        <!-- PEMILIK -->
         @if($role == 'pemilik')
-        <li>
-            <a href="/laporan"
-               class="flex items-center gap-3 p-2 rounded hover:bg-indigo-600 transition">
-                <span>📊</span> Laporan
-            </a>
-        </li>
 
-        <li>
-            <a href="/petugas"
-               class="flex items-center gap-3 p-2 rounded hover:bg-indigo-600 transition">
-                <span>👨‍💼</span> Data Petugas
-            </a>
-        </li>
+        <p class="text-xs text-slate-500 mt-4 mb-2 uppercase">Management</p>
+
+        <a href="/laporan"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span>📊</span>
+            <span>Laporan</span>
+        </a>
+
+        <a href="/petugas"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span>👨‍💼</span>
+            <span>Petugas</span>
+        </a>
+
         @endif
 
 
-        {{-- PETUGAS --}}
+        <!-- PETUGAS -->
         @if($role == 'petugas')
 
-        <li>
-            <a href="/petugas/barang"
-               class="flex items-center gap-3 p-2 rounded hover:bg-indigo-600 transition">
-                <span>📦</span> Barang
-            </a>
-        </li>
+        <p class="text-xs text-slate-500 mt-4 mb-2 uppercase">Master Data</p>
 
-        <li>
-            <a href="/petugas/user"
-               class="flex items-center gap-3 p-2 rounded hover:bg-indigo-600 transition">
-                <span>👥</span> Anggota
-            </a>
-        </li>
+        <a href="/petugas/barang"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span>📦</span>
+            <span>Barang</span>
+        </a>
 
-        {{-- DROPDOWN TRANSAKSI --}}
-        <li x-data="{open:false}">
-            
-            <button 
-                @click="open=!open"
-                class="w-full flex justify-between items-center p-2 rounded hover:bg-indigo-600 transition">
+        <a href="/petugas/user"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span>👥</span>
+            <span>Anggota</span>
+        </a>
+
+        <!-- TRANSAKSI -->
+        <div x-data="{open:false}">
+            <button @click="open=!open"
+                class="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-slate-800 transition">
                 
                 <span class="flex items-center gap-3">
                     🧾 Transaksi
                 </span>
 
-                <span x-text="open ? '▲' : '▼'"></span>
+                <svg :class="open ? 'rotate-180' : ''"
+                     class="w-4 h-4 transition-transform"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     viewBox="0 0 24 24">
+                    <path d="M19 9l-7 7-7-7" />
+                </svg>
             </button>
 
-            <ul x-show="open" x-transition class="ml-6 mt-2 space-y-1 text-sm">
+            <div x-show="open" x-transition class="ml-6 mt-2 space-y-1 text-sm">
 
-                <li>
-                    <a href="/petugas/transaksi/create"
-                       class="block p-2 rounded hover:bg-indigo-600">
-                       💰 Kasir
-                    </a>
-                </li>
+                <a href="/petugas/transaksi/create" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
+                    💰 Kasir
+                </a>
 
-                <li>
-                    <a href="/petugas/transaksi/tersewa"
-                       class="block p-2 rounded hover:bg-indigo-600">
-                       📦 Tersewa
-                    </a>
-                </li>
+                <a href="/petugas/transaksi/tersewa" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
+                    📦 Tersewa
+                </a>
 
-                <li>
-                    <a href="/petugas/transaksi/dipinjam"
-                       class="block p-2 rounded hover:bg-indigo-600">
-                       📤 Dipinjam
-                    </a>
-                </li>
+                <a href="/petugas/transaksi/dipinjam" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
+                    📤 Dipinjam
+                </a>
 
-                <li>
-                    <a href="/petugas/transaksi/terdenda"
-                       class="block p-2 rounded hover:bg-indigo-600">
-                       ⚠️ Denda
-                    </a>
-                </li>
+                <a href="/petugas/transaksi/terdenda" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
+                    ⚠️ Denda
+                </a>
 
-                <li>
-                    <a href="/petugas/transaksi/selesai"
-                       class="block p-2 rounded hover:bg-indigo-600">
-                       ✅ Selesai
-                    </a>
-                </li>
+                <a href="/petugas/transaksi/selesai" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
+                    ✅ Selesai
+                </a>
 
-            </ul>
+            </div>
+        </div>
 
-        </li>
-        <li>
-            <a href="/katalog"
-               class="flex items-center gap-3 p-2 rounded hover:bg-indigo-600 transition">
-                <span>🛒</span> Anggota Sewa
-            </a>
-        </li>
-
-        <li>
-            <a href="/riwayat"
-               class="flex items-center gap-3 p-2 rounded hover:bg-indigo-600 transition">
-                <span>📜</span> Riwayat Sewa
-            </a>
-        </li>
-        <li x-data="{open:false}">
-            
-            <button 
-                @click="open=!open"
-                class="w-full flex justify-between items-center p-2 rounded hover:bg-indigo-600 transition">
+        <!-- LAPORAN -->
+        <div x-data="{open:false}">
+            <button @click="open=!open"
+                class="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-slate-800 transition">
                 
                 <span class="flex items-center gap-3">
-                    🧾 Laporan
+                    📑 Laporan
                 </span>
 
-                <span x-text="open ? '▲' : '▼'"></span>
+                <svg :class="open ? 'rotate-180' : ''"
+                     class="w-4 h-4 transition-transform"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     viewBox="0 0 24 24">
+                    <path d="M19 9l-7 7-7-7" />
+                </svg>
             </button>
 
-            <ul x-show="open" x-transition class="ml-6 mt-2 space-y-1 text-sm">
+            <div x-show="open" x-transition class="ml-6 mt-2 space-y-1 text-sm">
 
-                <li>
-                    <a href="/petugas/transaksi/create"
-                       class="block p-2 rounded hover:bg-indigo-600">
-                       💰 Laporan Denda
-                    </a>
-                </li>
+                <a href="#" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
+                    💰 Denda
+                </a>
 
-                <li>
-                    <a href="/petugas/transaksi/tersewa"
-                       class="block p-2 rounded hover:bg-indigo-600">
-                       📦 Laporan Kerusakan
-                    </a>
-                </li>
+                <a href="#" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
+                    📦 Kerusakan
+                </a>
 
-                <li>
-                    <a href="/petugas/transaksi/dipinjam"
-                       class="block p-2 rounded hover:bg-indigo-600">
-                       📤 Laporan Penyewaan
-                    </a>
-                </li>
+                <a href="#" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
+                    📤 Penyewaan
+                </a>
 
-            </ul>
-
-        </li>
+            </div>
+        </div>
 
         @endif
 
 
-        {{-- ANGGOTA --}}
+        <!-- ANGGOTA -->
         @if($role == 'anggota')
 
-        <li>
-            <a href="/katalog"
-               class="flex items-center gap-3 p-2 rounded hover:bg-indigo-600 transition">
-                <span>🛒</span> Katalog Sewa
-            </a>
-        </li>
+        <p class="text-xs text-slate-500 mt-4 mb-2 uppercase">Menu</p>
 
-        <li>
-            <a href="/riwayat"
-               class="flex items-center gap-3 p-2 rounded hover:bg-indigo-600 transition">
-                <span>📜</span> Riwayat Sewa
+        <a href="/anggota/sewa"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span>🛒</span>
+            <span>Katalog</span>
+        </a>
+
+        <div x-data="{open:false}">
+            <button @click="open=!open"
+                class="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+                
+                <span class="flex items-center gap-3">
+                    🧾 Transaksi
+                </span>
+
+                <svg :class="open ? 'rotate-180' : ''"
+                     class="w-4 h-4 transition-transform"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     viewBox="0 0 24 24">
+                    <path d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+
+            <div x-show="open" x-transition class="ml-6 mt-2 space-y-1 text-sm">
+
+                <a href="/anggota/riwayat/tersewa" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
+                    📦 Tersewa
+                </a>
+
+                <a href="/anggota/riwayat/dipinjam" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
+                    📤 Dipinjam
+                </a>
+
+                <a href="/anggota/riwayat/terdenda" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
+                    ⚠️ Denda
+                </a>
+
+                <a href="/anggota/riwayat/selesai" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
+                    ✅ Selesai
+                </a>
+
+            </div>
+        </div>
+        
+            <a href="/anggota/profile"
+               class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+                <span>👤</span>
+                <span>Profile</span>
             </a>
-        </li>
 
         @endif
 
-    </ul>
+    </nav>
 
 </aside>

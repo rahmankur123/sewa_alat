@@ -15,8 +15,7 @@ class Barang extends Model
         'stok',
         'harga_per_hari',
         'denda_kerusakan',
-        'denda_keterlambatan_per_hari',
-        'status'
+        'denda_keterlambatan_per_hari'
     ];
     public function barang()
 {

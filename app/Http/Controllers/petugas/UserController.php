@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Petugas;
 
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -24,13 +25,13 @@ class UserController extends Controller
 
         $users = $query->latest()->paginate(12);
 
-        return view('admin.user.index', compact('users'));
+        return view('petugas.user.index', compact('users'));
     }
 
     // ================= FORM TAMBAH =================
     public function create()
     {
-        return view('admin.user.create');
+        return view('petugas.user.create');
     }
 
     // ================= SIMPAN =================
@@ -41,12 +42,13 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6|confirmed',
             'status' => 'required',
+            'no_hp' => 'required',
             'alamat' => 'required',
             'foto' => 'nullable|image|max:2048',
         ]);
 
         // ambil field aman
-        $data = $request->only(['name','email','alamat','status','role']);
+        $data = $request->only(['name','email','alamat','status','no_hp','role']);
 
         // default role
         $data['role'] = $request->role ?? 'anggota';
@@ -68,7 +70,7 @@ class UserController extends Controller
     public function edit($id)
     {
         $user = User::findOrFail($id);
-        return view('admin.user.edit', compact('user'));
+        return view('petugas.user.edit', compact('user'));
     }
 
     // ================= UPDATE =================
@@ -80,12 +82,13 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'status' => 'required',
+            'no_hp' => 'required',
             'alamat' => 'required',
             'password' => 'nullable|min:6|confirmed',
             'foto' => 'nullable|image|max:2048',
         ]);
 
-        $data = $request->only(['name','email','alamat','status','role']);
+        $data = $request->only(['name','email','alamat','status','no_hp','role']);
 
         // password optional
         if ($request->filled('password')) {

@@ -5,7 +5,7 @@ use App\Http\Controllers\Petugas\BarangController;
 use App\Http\Controllers\Petugas\TransaksiController;
 use App\Http\Controllers\Petugas\UserController;
 use App\Http\Controllers\Pemilik\LaporanController;
-use App\Http\Controllers\Anggota\SewaController;
+use App\Http\Controllers\User\SewaController;
 use App\Http\Controllers\Auth\LoginController;
 
 
@@ -35,25 +35,39 @@ Route::get('/laporan-kerusakan',[LaporanController::class,'kerusakan']);
 
 Route::middleware(['auth','role:petugas'])->prefix('petugas')->group(function(){
 
-    Route::get('/dipinjam', [TransaksiController::class,'dipinjam'])->name('transaksi.dipinjam');
+    Route::get('/transaksi/create', [TransaksiController::class,'create'])->name('petugas.transaksi.create');
 
-    Route::delete('/hapus/{id}', [TransaksiController::class,'hapus'])->name('transaksi.hapus');
+    Route::post('/transaksi/create', [TransaksiController::class,'store'])->name('petugas.transaksi.store');
 
-    Route::get('/kembalikan/{id}', [TransaksiController::class,'formKembalikan'])->name('transaksi.formKembalikan');
+    Route::get('/transaksi/dipinjam', [TransaksiController::class,'dipinjam'])->name('petugas.transaksi.dipinjam');
 
-    Route::post('/kembalikan/{id}', [TransaksiController::class,'prosesKembalikan'])->name('transaksi.prosesKembalikan');
+    Route::delete('/transaksi/hapus/{id}', [TransaksiController::class,'hapus'])->name('petugas.transaksi.hapus');
 
-    Route::get('/terdenda',[TransaksiController::class,'terdenda'])->name('transaksi.terdenda');
+    Route::get('/transaksi/kembalikan/{id}', [TransaksiController::class,'formKembalikan'])->name('petugas.transaksi.formKembalikan');
 
-    Route::post('/{id}/lunas',[TransaksiController::class,'lunas'])->name('transaksi.lunas');
+    Route::post('/transaksi/kembalikan/{id}', [TransaksiController::class,'prosesKembalikan'])->name('petugas.transaksi.prosesKembalikan');
 
-    Route::get('/selesai',[TransaksiController::class,'selesai'])->name('transaksi.selesai');
+    Route::get('/transaksi/terdenda',[TransaksiController::class,'terdenda'])->name('petugas.transaksi.terdenda');
 
-    Route::get('/tersewa',[TransaksiController::Class,'tersewa'])->name('transaksi.tersewa');
+    Route::get('/transaksi/terdenda/{id}/detail',[TransaksiController::class,'detailDenda'])->name('petugas.transaksi.detailDenda');
 
-    Route::post('/tersewa/{id}', [TransaksiController::class,'diambil'])->name('transaksi.diambil');
+    Route::post('/transaksi/{id}/lunas',[TransaksiController::class,'lunas'])->name('petugas.transaksi.lunas');
 
-    Route::get('/selesai/{id}',[TransaksiController::class,'notaSelesai'])->name('transaksi.notaSelesai');
+    Route::get('/transaksi/selesai',[TransaksiController::class,'selesai'])->name('petugas.transaksi.selesai');
+
+    Route::get('/transaksi/tersewa',[TransaksiController::class,'tersewa'])->name('petugas.transaksi.tersewa');
+
+    Route::post('/transaksi/tersewa/{id}', [TransaksiController::class,'diambil'])->name('petugas.transaksi.diambil');
+
+    Route::get('/transaksi/selesai/{id}/nota',[TransaksiController::class,'notaSelesai'])->name('petugas.transaksi.notaSelesai');
+
+    Route::get('/transaksi/selesai/{id}/detail',[TransaksiController::class,'detailSelesai'])->name('petugas.transaksi.detailSelesai');
+
+    Route::get('/transaksi/terdenda/{id}',[TransaksiController::class,'notaDenda'])->name('petugas.transaksi.notaDenda');
+
+    Route::get('/transaksi/detail/{id}', [TransaksiController::class,'detail'])->name('petugas.transaksi.detail');
+
+    Route::get('/transaksi/show/{id}', [TransaksiController::class,'show'])->name('petugas.transaksi.show');
 
     Route::resource('barang', BarangController::class)->names([
         'index' => 'barang.index',
@@ -78,8 +92,27 @@ Route::middleware(['auth','role:anggota'])->prefix('anggota')->group(function(){
 
     Route::get('/sewa',[SewaController::class,'index'])->name('anggota.sewa');
 
-    Route::get('/riwayat',[SewaController::class,'riwayat'])->name('anggota.riwayat');
+    Route::post('/sewa',[SewaController::class,'store'])->name('sewa.store');
 
-    Route::get('/profil',[SewaController::class,'profil'])->name('anggota.profil');
+    Route::get('/profil', [UserController::class, 'editProfil'])->name('profil.edit');
+
+    Route::put('/profil', [UserController::class, 'updateProfil'])->name('profil.update');
+
+    Route::get('/riwayat/tersewa',[SewaController::class,'tersewa'])->name('riwayat.tersewa');
+
+    Route::get('/riwayat/dipinjam',[SewaController::class,'dipinjam'])->name('riwayat.dipinjam');
+
+    Route::get('/riwayat/terdenda',[SewaController::class,'terdenda'])->name('riwayat.terdenda');
+
+    Route::get('/riwayat/selesai',[SewaController::class,'selesai'])->name('riwayat.selesai');
+
+    Route::get('/riwayat/detail/{id}', [SewaController::class,'detail'])->name('anggota.riwayat.detail');
+
+    Route::get('/riwayat/detaildenda/{id}', [SewaController::class,'detailDenda'])->name('anggota.riwayat.detaildenda');
+
+    Route::get('/riwayat/detailselesai/{id}', [SewaController::class,'detailSelesai'])->name('anggota.riwayat.detailselesai');
+
+    Route::delete('/riwayat/hapus/{id}', [SewaController::class,'hapus'])->name('anggota.riwayat.hapus');
+
 
 });

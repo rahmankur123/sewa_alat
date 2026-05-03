@@ -10,8 +10,20 @@ class User extends Authenticatable
     protected $table = 'users';
 
     protected $fillable = [
-        'name','email','password','alamat','foto','role','status','token_aktivasi'
+        'name','email','password','no_hp', 'alamat','foto','role','status','token_aktivasi'
     ];
 
+    public function transaksi()
+    {
+        return $this->hasMany(Transaksi::class);
+    }
+    public function detailTransaksi()
+    {
+        return $this->hasMany(DetailTransaksi::class);
+    }
+    public function Barang()
+    {
+        return $this->hasMany(Barang::class);
+    }
     
 }

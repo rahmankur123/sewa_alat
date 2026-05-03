@@ -2,7 +2,7 @@
 
 <p>Nama: {{ $user->name }}</p>
 <p>Total: Rp {{ number_format($transaksi->total_harga) }}</p>
-<p>Status: {{ $transaksi->status_transaksi }}</p>
+<p>Status: {{ $transaksi->status }}</p>
 
 @if($isBaru)
 <hr>

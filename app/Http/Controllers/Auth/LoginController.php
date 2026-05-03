@@ -35,7 +35,7 @@ public function proses(Request $request)
         }
 
         if($role == 'petugas'){
-            return redirect()->route('transaksi.tersewa');
+            return redirect()->route('petugas.transaksi.tersewa');
         }
 
         if($role == 'anggota'){

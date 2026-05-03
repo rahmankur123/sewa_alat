@@ -1,4 +1,3 @@
-```blade
 <!DOCTYPE html>
 <html>
 <head>
@@ -173,4 +172,3 @@ window.print();
 
 </body>
 </html>
-```

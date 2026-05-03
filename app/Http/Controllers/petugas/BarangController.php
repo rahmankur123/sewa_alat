@@ -19,11 +19,6 @@ class BarangController extends Controller
         $query->where('nama_barang', 'like', "%{$request->search}%");
     }
 
-    // FILTER STATUS
-    if ($request->status) {
-        $query->where('status', $request->status);
-    }
-
     // FILTER HARGA
     if ($request->min_harga) {
         $query->where('harga_per_hari', '>=', $request->min_harga);
@@ -34,14 +29,14 @@ class BarangController extends Controller
 
     $barang = $query->latest()->paginate(12);
 
-    return view('admin.barang.index', compact('barang'));
+    return view('petugas.barang.index', compact('barang'));
 }
 
 
     // ================= FORM TAMBAH =================
     public function create()
     {
-        return view('admin.barang.create');
+        return view('petugas.barang.create');
     }
 
     // ================= SIMPAN DATA =================
@@ -72,7 +67,7 @@ class BarangController extends Controller
     public function edit($id)
     {
         $barang = Barang::findOrFail($id);
-        return view('admin.barang.edit', compact('barang'));
+        return view('petugas.barang.edit', compact('barang'));
     }
 
     // ================= UPDATE DATA =================

@@ -50,25 +50,39 @@ class TransaksiController extends Controller
     // SIMPAN TRANSAKSI
    public function store(Request $request)
 {
+    $request->validate([
+        'tanggal_pinjam' => 'required|date',
+        'tanggal_kembali_rencana' => 'required|date',
+        'barang_id' => 'required|array',
+        'qty' => 'required|array',
+    ]);
+
     $transaksi = DB::transaction(function() use ($request){
 
         // ================== HANDLE USER ==================
         if($request->user_id){
-
             $user = User::findOrFail($request->user_id);
-
         } else {
+
+            $password = Str::random(8);
 
             $user = User::create([
                 'name' => 'User Baru',
                 'email' => $request->email,
-                'password' => Hash::make(Str::random(8)),
+                'password' => Hash::make($password),
                 'role' => 'anggota',
                 'status' => 'belum_aktif',
                 'alamat' => '-',
                 'token_aktivasi' => Str::random(40)
             ]);
         }
+
+        // ================== HITUNG DURASI ==================
+        $durasi = $request->durasi 
+            ?? \Carbon\Carbon::parse($request->tanggal_pinjam)
+                ->diffInDays($request->tanggal_kembali_rencana);
+
+        if ($durasi <= 0) $durasi = 1;
 
         // ================== BUAT TRANSAKSI ==================
         $transaksi = Transaksi::create([
@@ -77,15 +91,19 @@ class TransaksiController extends Controller
             'tanggal_kembali_rencana' => $request->tanggal_kembali_rencana,
             'total_harga' => 0,
             'status_pembayaran' => 'lunas',
+            'status_transaksi' => 'dipinjam', // 🔥 penting
         ]);
 
-        $durasi = $request->durasi ?? 1;
         $total = 0;
 
         foreach($request->barang_id as $i => $id){
 
+            // skip kalau kosong
+            if (!$id || !$request->qty[$i]) continue;
+
             $barang = Barang::findOrFail($id);
-            $qty = $request->qty[$i];
+            $qty = (int) $request->qty[$i];
+
             $subtotal = $barang->harga_per_hari * $qty * $durasi;
 
             DetailTransaksi::create([
@@ -99,27 +117,44 @@ class TransaksiController extends Controller
             $total += $subtotal;
         }
 
-        $transaksi->update(['total_harga'=>$total]);
+        // ================== UPDATE TOTAL ==================
+        $transaksi->update([
+            'total_harga' => $total
+        ]);
 
-        // ================== KIRIM EMAIL ==================
+        // ================== LOAD RELASI (BIAR LANGSUNG KE VIEW) ==================
+        $transaksi->load(['user','detail.barang']);
 
-        $isBaru = $user->status === 'belum_aktif';
+        // ================== EMAIL ==================
+        try {
+            $isBaru = $user->status === 'belum_aktif';
 
-        Mail::to($user->email)
-            ->send(new TransaksiMail($transaksi, $user, $isBaru));
+            Mail::to($user->email)
+                ->send(new TransaksiMail($transaksi, $user, $isBaru));
+
+        } catch (\Exception $e) {
+            \Log::error('Gagal kirim email: '.$e->getMessage());
+        }
 
         return $transaksi;
     });
 
     return redirect()
-            ->route('petugas.transaksi.show', $transaksi->id)
-            ->with('success','Transaksi berhasil');
+        ->route('petugas.transaksi.show', $transaksi->id)
+        ->with('success','Transaksi berhasil dibuat');
 }
-public function dipinjam()
+public function dipinjam(Request $request)
 {
-    $data = Transaksi::with('user')
-            ->where('status_transaksi','dipinjam')
-            ->get();
+    $query = Transaksi::with('user')
+        ->where('status_transaksi', 'dipinjam');
+
+    if ($request->search) {
+        $query->whereHas('user', function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->search . '%');
+        });
+    }
+
+    $data = $query->latest()->paginate(10)->withQueryString();
 
     return view('petugas.transaksi.dipinjam', compact('data'));
 }
@@ -160,7 +195,7 @@ if($tanggal_real > $tanggal_rencana){
             'barang_id' => $barang->id,
             'qty' => $detail->qty,
             'total_denda' => $denda_telat,
-            'durasi_hari' => \Carbon\Carbon::parse($transaksi->tanggal_pinjam)
+            'durasi_hari' => \Carbon\Carbon::parse($transaksi->tanggal_kembali_rencana)
                             ->diffInDays($tanggal_real)
         ]);
     }
@@ -209,20 +244,43 @@ foreach($transaksi->detail as $detail){
 
     $transaksi->save();
 
-    return redirect()->route('transaksi.dipinjam')
+    return redirect()->route('petugas.transaksi.dipinjam')
         ->with('success','Pengembalian berhasil');
 }
-public function terdenda()
-{
-    $data = Transaksi::with([
-        'user',
-        'kerusakan',
-        'keterlambatan'
-    ])
-    ->where('status_transaksi','terdenda')
-    ->get();
 
+public function detail($id)
+{
+    $transaksi = Transaksi::with('user','detail.barang')
+            ->findOrFail($id);
+
+    return view('petugas.transaksi.detail', compact('transaksi'));
+}
+
+public function terdenda(Request $request)
+{
+    $query = Transaksi::with(['user','kerusakan','keterlambatan'])
+        ->where('status_transaksi','terdenda');
+
+    if ($request->search) {
+        $query->whereHas('user', function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->search . '%');
+        });
+    }
+
+    $data = $query->latest()->paginate(10)->withQueryString();
     return view('petugas.transaksi.terdenda', compact('data'));
+}
+
+public function notaDenda($id)
+{
+    $transaksi = Transaksi::with([
+        'user',
+        'detail.barang',
+        'kerusakan.barang',
+        'keterlambatan'
+    ])->findOrFail($id);
+
+    return view('petugas.transaksi.nota_denda', compact('transaksi'));
 }
 public function lunas($id)
 {
@@ -233,16 +291,30 @@ public function lunas($id)
         'status_transaksi' => 'selesai'
     ]);
 
-    return view('petugas.transaksi.nota_denda', compact('transaksi'));
+    $data = Transaksi::with([
+        'user',
+        'kerusakan',
+        'keterlambatan'
+    ])
+    ->where('status_transaksi','terdenda')
+    ->get();
+    return view('petugas.transaksi.terdenda', compact('data'));
 }
-public function selesai()
+
+public function selesai(Request $request)
 {
-   $data = Transaksi::with(['user','kerusakan','keterlambatan'])
-        ->where('status_transaksi','selesai')
-        ->get();
+    $query = Transaksi::with('user')
+        ->where('status_transaksi','selesai');
+
+    if ($request->search) {
+        $query->whereHas('user', function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->search . '%');
+        });
+    }
+
+    $data = $query->latest()->paginate(10)->withQueryString();
 
     return view('petugas.transaksi.selesai', compact('data'));
-
 }
 
 public function notaSelesai($id)
@@ -256,11 +328,19 @@ public function notaSelesai($id)
 
     return view('petugas.transaksi.nota_selesai', compact('transaksi'));
 }
-public function tersewa()
+public function tersewa(Request $request)
 {
-    $data = Transaksi::with(['user'])
-        ->where('status_transaksi','tersewa')
-        ->get();
+    $query = Transaksi::with(['user'])
+        ->where('status_transaksi','tersewa');
+    
+    // SEARCH NAMA USER
+    if ($request->search) {
+        $query->whereHas('user', function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->search . '%');
+        });
+    }
+
+    $data = $query->latest()->paginate(10);
 
     return view('petugas.transaksi.tersewa', compact('data'));
 }
@@ -281,7 +361,44 @@ public function diambil($id)
 
     }
 
-    return redirect()->route('transaksi.tersewa')
+    return redirect()->route('petugas.transaksi.tersewa')
         ->with('success','Status transaksi diupdate & stok berkurang');
 }
+
+
+public function hapus($id)
+{
+    $transaksi = Transaksi::findOrFail($id);
+
+    // kembalikan stok jika sedang dipinjam
+    if(in_array($transaksi->status_transaksi, ['dipinjam','tersewa'])){
+
+        foreach($transaksi->detail as $detail){
+            $detail->barang->increment('stok', $detail->qty);
+        }
+    }
+
+    // 🔥 hapus relasi dulu
+    $transaksi->detail()->delete();
+    $transaksi->kerusakan()->delete();
+    $transaksi->keterlambatan()->delete();
+
+    $transaksi->delete();
+
+    return redirect()->back()->with('success','Transaksi berhasil dihapus');
+}
+
+public function detailSelesai($id)
+{
+    $transaksi = Transaksi::with('user','detail.barang','kerusakan.barang','keterlambatan')->findOrFail($id);
+
+    return view('petugas.transaksi.detailselesai', compact('transaksi'));
+}
+public function detailDenda($id)
+{
+    $transaksi = Transaksi::with('user','detail.barang','kerusakan.barang','keterlambatan')->findOrFail($id);  
+
+    return view('petugas.transaksi.detaildenda', compact('transaksi'));
+}
+
 }
