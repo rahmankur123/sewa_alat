@@ -45,6 +45,10 @@ Lunas
 </button>
 
 </form>
+<a href="{{ route('petugas.transaksi.notaDenda',$d->id) }}"
+class="bg-blue-500 text-white px-3 py-1 rounded">
+Cetak Nota
+</td>
 
 </td>
 
