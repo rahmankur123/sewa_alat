@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Login Rental</title>
-    <link rel="stylesheet" href="{{ asset('public/build/assets/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('public/build/assets/app-DzsY5ePQ.css') }}">
 </head>
 
 <body class="bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center min-h-screen">
