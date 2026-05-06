@@ -27,7 +27,7 @@
         <div>
             <p class="text-slate-500">Nama User</p>
             <p class="font-semibold text-slate-700">
-                {{ $transaksi->user->name }}
+                {{ optional($transaksi->user)->name ?? '-' }}
             </p>
         </div>
 
@@ -41,14 +41,18 @@
         <div>
             <p class="text-slate-500">Tanggal Pinjam</p>
             <p>
-                {{ \Carbon\Carbon::parse($transaksi->tanggal_pinjam)->translatedFormat('d F Y') }}
+                {{ $transaksi->tanggal_pinjam 
+                    ? \Carbon\Carbon::parse($transaksi->tanggal_pinjam)->translatedFormat('d F Y') 
+                    : '-' }}
             </p>
         </div>
 
         <div>
             <p class="text-slate-500">Rencana Kembali</p>
             <p>
-                {{ \Carbon\Carbon::parse($transaksi->tanggal_kembali_rencana)->translatedFormat('d F Y') }}
+                {{ $transaksi->tanggal_kembali_rencana 
+                    ? \Carbon\Carbon::parse($transaksi->tanggal_kembali_rencana)->translatedFormat('d F Y') 
+                    : '-' }}
             </p>
         </div>
 
@@ -68,14 +72,14 @@
         <div>
             <p class="text-slate-500 text-sm">Total Harga</p>
             <p class="text-xl font-bold text-slate-800">
-                Rp {{ number_format($transaksi->total_harga,0,',','.') }}
+                Rp {{ number_format($transaksi->total_harga ?? 0,0,',','.') }}
             </p>
         </div>
 
         <div class="text-right">
             <p class="text-slate-500 text-sm">Total Item</p>
             <p class="font-semibold text-slate-700">
-                {{ $transaksi->detail->sum('qty') }} item
+                {{ $transaksi->detail->sum('qty') ?? 0 }} item
             </p>
         </div>
     </div>
@@ -107,12 +111,16 @@
                 @php $total = 0; @endphp
 
                 @forelse($transaksi->detail as $d)
-                    @php $total += $d->subtotal; @endphp
+
+                    @php
+                        $subtotal = $d->subtotal ?? ($d->qty * $d->harga_per_hari);
+                        $total += $subtotal;
+                    @endphp
 
                     <tr class="hover:bg-slate-100 transition duration-200">
 
                         <td class="px-6 py-4">
-                            {{ $d->barang->nama_barang }}
+                            {{ optional($d->barang)->nama_barang ?? '-' }}
                         </td>
 
                         <td class="px-6 py-4 text-center">
@@ -120,11 +128,11 @@
                         </td>
 
                         <td class="px-6 py-4 text-right">
-                            Rp {{ number_format($d->harga_per_hari,0,',','.') }}
+                            Rp {{ number_format($d->harga_per_hari ?? 0,0,',','.') }}
                         </td>
 
                         <td class="px-6 py-4 text-right font-semibold">
-                            Rp {{ number_format($d->subtotal,0,',','.') }}
+                            Rp {{ number_format($subtotal,0,',','.') }}
                         </td>
 
                     </tr>
@@ -138,7 +146,7 @@
                 @endforelse
             </tbody>
 
-            {{-- TOTAL TABLE --}}
+            {{-- TOTAL --}}
             <tfoot>
                 <tr class="bg-slate-50 font-semibold">
                     <td colspan="3" class="px-6 py-3 text-right">

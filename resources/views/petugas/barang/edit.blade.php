@@ -4,27 +4,33 @@
 
 @section('content')
 
-<div class="max-w-5xl mx-auto">
+<div class="max-w-4xl mx-auto">
 
     {{-- HEADER --}}
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-semibold text-slate-700">
-            Edit Barang
-        </h2>
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-6">
+        <div>
+            <h2 class="text-xl md:text-2xl font-semibold text-gray-800">
+                Edit Barang
+            </h2>
+            <p class="text-sm text-gray-500">
+                Perbarui data barang yang sudah ada
+            </p>
+        </div>
 
         <a href="{{ route('barang.index') }}"
-           class="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 text-sm">
+           class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm w-fit">
             ← Kembali
         </a>
     </div>
 
     {{-- CARD --}}
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+    <div class="bg-white rounded-2xl shadow p-6 md:p-8">
 
         {{-- ERROR --}}
         @if ($errors->any())
-            <div class="mb-4 p-4 rounded-lg bg-red-100 text-red-700 border border-red-300">
-                <ul class="list-disc pl-5 text-sm">
+            <div class="mb-6 p-4 rounded-xl bg-red-50 text-red-700">
+                <p class="font-semibold mb-1">Terjadi kesalahan:</p>
+                <ul class="list-disc pl-5 text-sm space-y-1">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
@@ -36,74 +42,78 @@
         @csrf
         @method('PUT')
 
-        <div class="grid grid-cols-2 gap-4 text-sm">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
 
             {{-- NAMA --}}
             <div>
-                <label class="text-slate-600 mb-1 block">Nama Barang</label>
+                <label class="block text-gray-500 mb-1">Nama Barang</label>
                 <input type="text" name="nama_barang"
                     value="{{ old('nama_barang', $barang->nama_barang) }}"
-                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400">
+                    class="w-full px-3 py-2 bg-gray-50 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none transition">
             </div>
 
             {{-- STOK --}}
             <div>
-                <label class="text-slate-600 mb-1 block">Stok</label>
+                <label class="block text-gray-500 mb-1">Stok</label>
                 <input type="number" name="stok"
                     value="{{ old('stok', $barang->stok) }}"
-                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400">
+                    class="w-full px-3 py-2 bg-gray-50 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none transition">
             </div>
 
             {{-- HARGA --}}
             <div>
-                <label class="text-slate-600 mb-1 block">Harga / Hari</label>
+                <label class="block text-gray-500 mb-1">Harga / Hari</label>
                 <input type="number" name="harga_per_hari"
                     value="{{ old('harga_per_hari', $barang->harga_per_hari) }}"
-                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400">
+                    class="w-full px-3 py-2 bg-gray-50 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none transition">
             </div>
 
             {{-- DENDA KERUSAKAN --}}
             <div>
-                <label class="text-slate-600 mb-1 block">Denda Kerusakan</label>
+                <label class="block text-gray-500 mb-1">Denda Kerusakan</label>
                 <input type="number" name="denda_kerusakan"
                     value="{{ old('denda_kerusakan', $barang->denda_kerusakan) }}"
-                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400">
+                    class="w-full px-3 py-2 bg-gray-50 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none transition">
             </div>
 
             {{-- DENDA TELAT --}}
             <div>
-                <label class="text-slate-600 mb-1 block">Denda Keterlambatan / Hari</label>
+                <label class="block text-gray-500 mb-1">Denda Keterlambatan / Hari</label>
                 <input type="number" name="denda_keterlambatan_per_hari"
                     value="{{ old('denda_keterlambatan_per_hari', $barang->denda_keterlambatan_per_hari) }}"
-                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400">
+                    class="w-full px-3 py-2 bg-gray-50 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none transition">
             </div>
 
-            {{--Denda Hilang--}}
+            {{-- DENDA HILANG --}}
             <div>
-                <label class="text-slate-600 mb-1 block">Denda Hilang</label>
+                <label class="block text-gray-500 mb-1">Denda Hilang</label>
                 <input type="number" name="denda_hilang"
                     value="{{ old('denda_hilang', $barang->denda_hilang) }}"
-                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400">
+                    class="w-full px-3 py-2 bg-gray-50 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none transition">
             </div>
 
             {{-- DESKRIPSI --}}
-            <div class="col-span-2">
-                <label class="text-slate-600 mb-1 block">Deskripsi</label>
+            <div class="md:col-span-2">
+                <label class="block text-gray-500 mb-1">Deskripsi</label>
                 <textarea name="deskripsi" rows="3"
-                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400">{{ old('deskripsi', $barang->deskripsi) }}</textarea>
+                    class="w-full px-3 py-2 bg-gray-50 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none transition">{{ old('deskripsi', $barang->deskripsi) }}</textarea>
             </div>
 
             {{-- FOTO --}}
-            <div class="col-span-2">
-                <label class="text-slate-600 mb-1 block">Foto Barang</label>
+            <div class="md:col-span-2">
+                <label class="block text-gray-500 mb-1">Foto Barang</label>
                 <input type="file" name="foto"
-                    class="w-full px-3 py-2 border rounded-lg">
+                    class="w-full text-sm bg-gray-50 rounded-lg file:mr-3 file:px-3 file:py-2 file:bg-indigo-50 file:text-indigo-600 file:border-0 file:rounded-md">
 
                 @if($barang->foto)
-                    <div class="mt-3">
-                        <p class="text-xs text-slate-500 mb-1">Foto saat ini:</p>
+                    <div class="mt-4 flex items-center gap-4">
                         <img src="{{ asset('storage/'.$barang->foto) }}"
-                             class="h-32 rounded-lg border shadow-sm">
+                             class="h-24 w-24 object-cover rounded-lg shadow">
+
+                        <div class="text-xs text-gray-500">
+                            <p>Foto saat ini</p>
+                            <p class="italic">Upload baru untuk mengganti</p>
+                        </div>
                     </div>
                 @endif
             </div>
@@ -111,15 +121,15 @@
         </div>
 
         {{-- BUTTON --}}
-        <div class="flex justify-end gap-2 mt-6 border-t pt-4">
+        <div class="flex flex-col sm:flex-row justify-end gap-2 mt-8">
 
             <a href="{{ route('barang.index') }}"
-               class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg">
+               class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-center">
                 Batal
             </a>
 
             <button type="submit"
-                class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600">
+                class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-sm">
                 Update
             </button>
 

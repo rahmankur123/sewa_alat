@@ -10,6 +10,7 @@ use App\Models\DetailTransaksi;
 use App\Models\User;
 use App\Models\Transaksi;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -34,24 +35,24 @@ class UserController extends Controller
 
         $data = $request->only('name','email','no_hp','alamat');
 
-        // ✅ PASSWORD (opsional & aman)
-        if($request->filled('password')){
-            $data['password'] = Hash::make($request->password);
+        // HANDLE PASSWORD
+    if($request->filled('password')){
+        $data['password'] = Hash::make($request->password);
+    } else {
+        unset($data['password']);
+    }
+
+     // HANDLE FOTO
+    if($request->hasFile('foto')){
+        if($user->foto){
+            Storage::disk('public')->delete($user->foto);
         }
 
-        // ✅ FOTO (hapus lama biar ga numpuk)
-        if($request->hasFile('foto')){
+        $data['foto'] = $request->file('foto')->store('users','public');
+    }
 
-            // hapus foto lama
-            if($user->foto && \Storage::disk('public')->exists($user->foto)){
-                \Storage::disk('public')->delete($user->foto);
-            }
+    $user->update($data);
 
-            $data['foto'] = $request->file('foto')->store('user','public');
-        }
-
-        $user->update($data);
-
-        return back()->with('success','Profil berhasil diupdate');
+    return back()->with('success','Profil berhasil diperbarui');
     }
 }

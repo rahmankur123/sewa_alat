@@ -3,136 +3,128 @@
 
 @section('content')
 
-<div class="grid grid-cols-12 gap-4">
+<div class="p-6 grid grid-cols-12 gap-6">
 
-{{-- 70% DAFTAR BARANG --}}
-<div class="col-span-8">
-    <h2 class="text-xl font-bold mb-3">Daftar Barang</h2>
+    {{-- =========================
+        DAFTAR BARANG (70%)
+    ========================== --}}
+    <div class="col-span-12 lg:col-span-8">
+        <h2 class="text-xl font-bold text-slate-700 mb-4">
+            Daftar Barang
+        </h2>
 
-    <div class="grid grid-cols-3 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
 
-        @foreach($barang as $b)
+            @foreach($barang as $b)
+            <div class="bg-white p-3 rounded-xl shadow-sm border hover:shadow-md transition">
 
-        <div class="bg-white p-3 shadow rounded">
+                {{-- FOTO --}}
+                <img src="{{ $b->foto ? asset('storage/'.$b->foto) : asset('img/default.png') }}"
+                     class="h-32 w-full object-cover rounded-lg">
 
-            <img src="{{ asset('storage/'.$b->foto) }}"
-                 class="h-32 w-full object-cover rounded">
+                {{-- NAMA --}}
+                <h3 class="font-semibold mt-2 text-slate-700">
+                    {{ $b->nama_barang }}
+                </h3>
 
-            <h3 class="font-bold mt-2">
-                {{ $b->nama_barang }}
-            </h3>
+                {{-- HARGA --}}
+                <p class="text-sm text-slate-500">
+                    Rp {{ number_format($b->harga_per_hari,0,',','.') }}/hari
+                </p>
 
-            <p class="text-sm text-gray-600">
-                Rp {{ number_format($b->harga_per_hari) }}/hari
-            </p>
+                {{-- STOK --}}
+                <p class="text-xs text-slate-400">
+                    Stok: {{ $b->stok }}
+                </p>
 
-            <p class="text-sm text-gray-500">
-                Stok : {{ $b->stok }}
-            </p>
+                {{-- BUTTON --}}
+                @if($b->stok == 0)
+                    <button class="bg-gray-400 text-white w-full py-1 mt-2 rounded text-sm" disabled>
+                        Stok Habis
+                    </button>
+                @else
+                    <button
+                        onclick="addToCart({{ $b->id }}, '{{ $b->nama_barang }}', {{ $b->harga_per_hari }})"
+                        class="bg-blue-600 text-white w-full py-1 mt-2 rounded text-sm hover:bg-blue-700">
+                        + Tambah
+                    </button>
+                @endif
 
-            @if($b->stok == 0)
-
-            <button class="bg-gray-400 text-white w-full py-1 mt-2 rounded" disabled>
-                Stok Habis
-            </button>
-
-            @else
-
-            <button
-                onclick="addToCart({{ $b->id }}, '{{ $b->nama_barang }}', {{ $b->harga_per_hari }})"
-                class="bg-blue-600 text-white w-full py-1 mt-2 rounded">
-
-                + Tambah
-
-            </button>
-
-            @endif
+            </div>
+            @endforeach
 
         </div>
-
-        @endforeach
-
     </div>
-</div>
 
 
-{{-- 30% KERANJANG --}}
-<div class="col-span-4 bg-white p-4 shadow rounded">
+    {{-- =========================
+        KERANJANG (30%)
+    ========================== --}}
+    <div class="col-span-12 lg:col-span-4">
+        <div class="bg-white p-4 rounded-xl shadow-sm border">
 
-<h2 class="font-bold text-lg mb-2">
-Keranjang Sewa
-</h2>
+            <h2 class="font-bold text-lg text-slate-700 mb-3">
+                Keranjang Sewa
+            </h2>
 
-<form action="{{ route('sewa.store') }}" method="POST">
-@csrf
+            <form action="{{ route('sewa.store') }}" method="POST">
+                @csrf
 
-{{-- USER ID OTOMATIS --}}
-<input type="hidden" name="user_id" value="{{ auth()->id() }}">
+                <input type="hidden" name="user_id" value="{{ auth()->id() }}">
+                <input type="hidden" name="durasi" id="durasiHidden">
 
-{{-- TANGGAL PINJAM --}}
-<div class="mt-3">
-<label>Tanggal Pinjam</label>
+                {{-- TANGGAL PINJAM --}}
+                <div class="mb-3">
+                    <label class="text-sm text-slate-600">Tanggal Pinjam</label>
+                    <input type="date" name="tanggal_pinjam" id="tglPinjam"
+                        class="border p-2 w-full rounded-lg text-sm">
+                </div>
 
-<input
-type="date"
-name="tanggal_pinjam"
-id="tglPinjam"
-class="border p-2 w-full">
-</div>
+                {{-- DURASI --}}
+                <div class="mb-3">
+                    <label class="text-sm text-slate-600">Durasi</label>
+                    <select id="durasi"
+                        class="border p-2 w-full rounded-lg text-sm">
+                        @for($i=1;$i<=9;$i++)
+                        <option value="{{ $i }}">{{ $i }} hari</option>
+                        @endfor
+                    </select>
+                </div>
 
+                {{-- TANGGAL KEMBALI --}}
+                <div class="mb-3">
+                    <label class="text-sm text-slate-600">Tanggal Kembali</label>
+                    <input type="date" name="tanggal_kembali_rencana" id="tglKembali"
+                        class="border p-2 w-full rounded-lg text-sm">
+                </div>
 
-{{-- DURASI --}}
-<div class="mt-2">
-<label>Durasi (hari)</label>
+                {{-- CART --}}
+                <div id="cartList" class="space-y-2"></div>
 
-<select id="durasi" class="border p-2 w-full">
-@for($i=1;$i<=9;$i++)
-<option value="{{ $i }}">{{ $i }} hari</option>
-@endfor
-</select>
+                {{-- TOTAL --}}
+                <div class="mt-4 text-lg font-bold text-slate-700">
+                    Total: Rp <span id="totalHarga">0</span>
+                </div>
 
-<input type="hidden" name="durasi" id="durasiHidden">
+                {{-- BUTTON --}}
+                <button type="submit"
+                    class="bg-green-600 text-white w-full py-2 mt-4 rounded-lg hover:bg-green-700">
+                    Checkout
+                </button>
 
-</div>
+            </form>
 
-
-{{-- TANGGAL KEMBALI --}}
-<div class="mt-3">
-<label>Tanggal Kembali</label>
-
-<input
-type="date"
-name="tanggal_kembali_rencana"
-id="tglKembali"
-class="border p-2 w-full"
->
-</div>
-
-
-{{-- LIST CART --}}
-<div id="cartList" class="mt-3"></div>
-
-
-{{-- TOTAL --}}
-<div class="mt-3 font-bold text-xl">
-Total: Rp <span id="totalHarga">0</span>
-</div>
-
-
-<button class="bg-green-600 text-white w-full py-2 mt-4 rounded">
-Checkout
-</button>
-
-</form>
-
-</div>
+        </div>
+    </div>
 
 </div>
 
 @endsection
 
 
-
+{{-- =========================
+    SCRIPT
+========================= --}}
 <script>
 
 let cart = [];
@@ -143,139 +135,111 @@ let lamaSewa = 1;
 // TAMBAH CART
 function addToCart(id,nama,harga){
 
-let item = cart.find(i => i.id === id);
+    let item = cart.find(i => i.id === id);
 
-if(item){
-    item.qty++;
-}else{
-    cart.push({
-        id,
-        nama,
-        harga,
-        qty:1
-    });
+    if(item){
+        item.qty++;
+    }else{
+        cart.push({ id, nama, harga, qty:1 });
+    }
+
+    renderCart();
 }
-
-renderCart();
-
-}
-
 
 
 // RENDER CART
 function renderCart(){
 
-let html = '';
-total = 0;
+    let html = '';
+    total = 0;
 
-lamaSewa = parseInt(document.getElementById('durasi').value);
+    lamaSewa = parseInt(document.getElementById('durasi').value);
 
-cart.forEach((item,i)=>{
+    cart.forEach((item,i)=>{
 
-let sub = item.harga * item.qty * lamaSewa;
+        let sub = item.harga * item.qty * lamaSewa;
+        total += sub;
 
-total += sub;
+        html += `
+        <div class="flex justify-between items-center border-b pb-2">
 
-html += `
-<div class="flex justify-between border-b py-1 items-center">
+            <div>
+                <p class="text-sm font-medium">${item.nama}</p>
+                <p class="text-xs text-slate-400">Rp ${item.harga.toLocaleString()}</p>
 
-<input type="hidden" name="barang_id[]" value="${item.id}">
-<input type="hidden" name="qty[]" value="${item.qty}">
+                <input type="hidden" name="barang_id[]" value="${item.id}">
+                <input type="hidden" name="qty[]" value="${item.qty}">
+            </div>
 
-<span>${item.nama}</span>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="kurangItem(${i})"
+                    class="px-2 bg-red-500 text-white rounded">-</button>
 
-<div class="flex items-center gap-2">
+                <span>${item.qty}</span>
 
-<button type="button"
-onclick="kurangItem(${i})"
-class="px-2 bg-red-500 text-white">-</button>
+                <button type="button" onclick="cart[${i}].qty++; renderCart()"
+                    class="px-2 bg-green-500 text-white rounded">+</button>
+            </div>
 
-<span>${item.qty}</span>
+            <span class="text-sm font-semibold">
+                Rp ${sub.toLocaleString()}
+            </span>
 
-<button type="button"
-onclick="cart[${i}].qty++; renderCart()"
-class="px-2 bg-green-500 text-white">+</button>
+        </div>
+        `;
+    });
 
-</div>
-
-<span>Rp ${sub.toLocaleString()}</span>
-
-</div>
-`;
-
-});
-
-document.getElementById('cartList').innerHTML = html;
-document.getElementById('totalHarga').innerText = total.toLocaleString();
-
+    document.getElementById('cartList').innerHTML = html;
+    document.getElementById('totalHarga').innerText = total.toLocaleString();
 }
-
 
 
 // KURANG ITEM
 function kurangItem(i){
-
-cart[i].qty--;
-
-if(cart[i].qty <= 0){
-cart.splice(i,1);
-}
-
-renderCart();
-
+    cart[i].qty--;
+    if(cart[i].qty <= 0){
+        cart.splice(i,1);
+    }
+    renderCart();
 }
 
 
-
-// DURASI
+// DURASI CHANGE
 document.getElementById('durasi').addEventListener('change',()=>{
 
-lamaSewa = parseInt(document.getElementById('durasi').value);
+    lamaSewa = parseInt(document.getElementById('durasi').value);
+    document.getElementById('durasiHidden').value = lamaSewa;
 
-document.getElementById('durasiHidden').value = lamaSewa;
-
-updateTanggalKembali();
-
-renderCart();
-
+    updateTanggalKembali();
+    renderCart();
 });
-
 
 
 // TANGGAL PINJAM
 document.getElementById('tglPinjam').addEventListener('change',updateTanggalKembali);
 
 
-
 // HITUNG TANGGAL KEMBALI
 function updateTanggalKembali(){
 
-let tgl = document.getElementById('tglPinjam').value;
+    let tgl = document.getElementById('tglPinjam').value;
+    if(!tgl) return;
 
-if(!tgl) return;
+    let pinjam = new Date(tgl);
+    pinjam.setDate(pinjam.getDate() + lamaSewa);
 
-let pinjam = new Date(tgl);
+    let yyyy = pinjam.getFullYear();
+    let mm = String(pinjam.getMonth()+1).padStart(2,'0');
+    let dd = String(pinjam.getDate()).padStart(2,'0');
 
-pinjam.setDate(pinjam.getDate()+lamaSewa);
-
-let yyyy = pinjam.getFullYear();
-let mm = String(pinjam.getMonth()+1).padStart(2,'0');
-let dd = String(pinjam.getDate()).padStart(2,'0');
-
-document.getElementById('tglKembali').value =
-`${yyyy}-${mm}-${dd}`;
-
+    document.getElementById('tglKembali').value = `${yyyy}-${mm}-${dd}`;
 }
 
 
-
-// DEFAULT
+// INIT
 window.onload = function(){
-
-lamaSewa = parseInt(document.getElementById('durasi').value);
-
-document.getElementById('durasiHidden').value = lamaSewa;
-
+    lamaSewa = parseInt(document.getElementById('durasi').value);
+    document.getElementById('durasiHidden').value = lamaSewa;
 }
 
 </script>

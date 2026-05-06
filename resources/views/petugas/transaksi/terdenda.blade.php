@@ -26,9 +26,9 @@
     <form method="GET" class="flex gap-2">
         <input type="text" name="search" value="{{ request('search') }}"
             placeholder="Cari nama user..."
-            class="px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-400">
+            class="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-400">
         
-        <button class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-700">
+        <button class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-700 transition">
             Cari
         </button>
     </form>
@@ -38,16 +38,16 @@
 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
 
     <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="w-full text-sm table-fixed">
 
             <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
                 <tr>
-                    <th class="px-6 py-3">No</th>
-                    <th class="px-6 py-3">Nama User</th>
-                    <th class="px-6 py-3">Denda Kerusakan</th>
-                    <th class="px-6 py-3">Denda Keterlambatan</th>
-                    <th class="px-6 py-3">Total Denda</th>
-                    <th class="px-6 py-3 text-center">Aksi</th>
+                    <th class="px-4 py-3 text-left w-12">No</th>
+                    <th class="px-4 py-3 text-left">Nama User</th>
+                    <th class="px-4 py-3 text-right">Kerusakan</th>
+                    <th class="px-4 py-3 text-right">Keterlambatan</th>
+                    <th class="px-4 py-3 text-right">Total Denda</th>
+                    <th class="px-4 py-3 text-center w-40">Aksi</th>
                 </tr>
             </thead>
 
@@ -60,49 +60,61 @@
                     $totalDenda = $dendaKerusakan + $dendaTerlambat;
                 @endphp
 
-                <tr class="border-t hover:bg-slate-50 transition">
+                <tr class="border-t hover:bg-slate-50 transition duration-200">
 
-                    {{-- NOMOR --}}
-                    <td class="px-6 py-4">
+                    {{-- NO --}}
+                    <td class="px-4 py-3">
                         {{ ($data->currentPage() - 1) * $data->perPage() + $loop->iteration }}
                     </td>
 
                     {{-- NAMA --}}
-                    <td class="px-6 py-4 font-medium">
+                    <td class="px-4 py-3 font-medium text-slate-700">
                         {{ $d->user->name }}
                     </td>
 
-                    {{-- DENDA KERUSAKAN --}}
-                    <td class="px-6 py-4 text-red-500 font-medium">
-                        Rp {{ number_format($dendaKerusakan,0,',','.') }}
+                    {{-- KERUSAKAN --}}
+                    <td class="px-4 py-3 text-right">
+                        @if($dendaKerusakan > 0)
+                            <span class="text-red-500 font-medium">
+                                Rp {{ number_format($dendaKerusakan,0,',','.') }}
+                            </span>
+                        @else
+                            <span class="text-slate-400">-</span>
+                        @endif
                     </td>
 
-                    {{-- DENDA KETERLAMBATAN --}}
-                    <td class="px-6 py-4 text-orange-500 font-medium">
-                        Rp {{ number_format($dendaTerlambat,0,',','.') }}
+                    {{-- KETERLAMBATAN --}}
+                    <td class="px-4 py-3 text-right">
+                        @if($dendaTerlambat > 0)
+                            <span class="text-orange-500 font-medium">
+                                Rp {{ number_format($dendaTerlambat,0,',','.') }}
+                            </span>
+                        @else
+                            <span class="text-slate-400">-</span>
+                        @endif
                     </td>
 
                     {{-- TOTAL --}}
-                    <td class="px-6 py-4 font-semibold text-slate-700">
+                    <td class="px-4 py-3 text-right font-semibold text-slate-700">
                         Rp {{ number_format($totalDenda,0,',','.') }}
                     </td>
 
                     {{-- AKSI --}}
-                    <td class="px-6 py-4 text-center space-x-1">
+                    <td class="px-4 py-3 text-center space-x-1">
 
                         {{-- LUNAS --}}
                         <form action="{{ route('petugas.transaksi.lunas',$d->id) }}" method="POST" class="inline"
                               onsubmit="return confirm('Yakin transaksi ini sudah lunas?')">
                             @csrf
                             <button type="submit"
-                                class="px-3 py-1 text-xs bg-emerald-500 text-white rounded-md hover:bg-emerald-600">
+                                class="px-3 py-1 text-xs bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition">
                                 Lunas
                             </button>
                         </form>
 
                         {{-- DETAIL --}}
                         <a href="{{ route('petugas.transaksi.detailDenda',$d->id) }}"
-                           class="px-3 py-1 text-xs bg-slate-500 text-white rounded-md hover:bg-slate-600">
+                           class="px-3 py-1 text-xs bg-slate-500 text-white rounded-md hover:bg-slate-600 transition">
                            Detail
                         </a>
 

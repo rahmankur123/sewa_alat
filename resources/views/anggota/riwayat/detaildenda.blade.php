@@ -75,113 +75,86 @@
 
     </div>
 
+    {{-- ================= HITUNG TOTAL ================= --}}
+    @php
+        $total_keterlambatan = $transaksi->keterlambatan->sum('total_denda');
+        $total_kerusakan     = $transaksi->kerusakan->sum('total_denda');
+        $total_hilang        = $transaksi->barangHilang->sum('denda');
+
+        $total_denda = $total_keterlambatan + $total_kerusakan + $total_hilang;
+    @endphp
+
     {{-- KETERLAMBATAN --}}
     <h3 class="font-semibold text-slate-700 mb-2">Denda Keterlambatan</h3>
 
-    @php $total_keterlambatan = 0; @endphp
-
     @if($transaksi->keterlambatan->count())
-        <div class="overflow-x-auto mb-6">
-            <table class="w-full text-sm border border-slate-200">
-
-                <thead class="bg-slate-100 text-slate-600 text-xs uppercase">
-                    <tr>
-                        <th class="p-2 border text-left">Durasi</th>
-                        <th class="p-2 border text-right">Denda</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @foreach($transaksi->keterlambatan as $k)
-                    @php $total_keterlambatan += $k->total_denda; @endphp
-                    <tr class="border-t">
-                        <td class="p-2 border">{{ $k->durasi_hari }} hari</td>
-                        <td class="p-2 border text-right text-red-500">
-                            Rp {{ number_format($k->total_denda,0,',','.') }}
-                        </td>
-                    </tr>
-                    @endforeach
-
-                    <tr class="font-semibold bg-slate-50">
-                        <td class="p-2 border text-right">Total</td>
-                        <td class="p-2 border text-right text-red-500">
-                            Rp {{ number_format($total_keterlambatan,0,',','.') }}
-                        </td>
-                    </tr>
-
-                </tbody>
-
-            </table>
-        </div>
+        <table class="w-full text-sm border mb-6">
+            <thead class="bg-slate-100 text-xs uppercase">
+                <tr>
+                    <th class="p-2 border text-left">Durasi</th>
+                    <th class="p-2 border text-right">Denda</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($transaksi->keterlambatan as $k)
+                <tr>
+                    <td class="p-2 border">{{ $k->durasi_hari }} hari</td>
+                    <td class="p-2 border text-right text-red-500">
+                        Rp {{ number_format($k->total_denda,0,',','.') }}
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
     @else
         <p class="mb-6 text-slate-400">Tidak ada keterlambatan</p>
     @endif
 
+
     {{-- KERUSAKAN --}}
     <h3 class="font-semibold text-slate-700 mb-2">Denda Kerusakan</h3>
 
-    @php $total_kerusakan = 0; @endphp
-
     @if($transaksi->kerusakan->count())
-        <div class="overflow-x-auto mb-6">
-            <table class="w-full text-sm border border-slate-200">
-
-                <thead class="bg-slate-100 text-slate-600 text-xs uppercase">
-                    <tr>
-                        <th class="p-2 border text-left">Barang</th>
-                        <th class="p-2 border text-center">Qty</th>
-                        <th class="p-2 border text-right">Denda</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @foreach($transaksi->kerusakan as $k)
-                    @php $total_kerusakan += $k->total_denda; @endphp
-                    <tr class="border-t">
-                        <td class="p-2 border">{{ $k->barang->nama_barang }}</td>
-                        <td class="p-2 border text-center">{{ $k->qty }}</td>
-                        <td class="p-2 border text-right text-red-500">
-                            Rp {{ number_format($k->total_denda,0,',','.') }}
-                        </td>
-                    </tr>
-                    @endforeach
-
-                    <tr class="font-semibold bg-slate-50">
-                        <td colspan="2" class="p-2 border text-right">Total</td>
-                        <td class="p-2 border text-right text-red-500">
-                            Rp {{ number_format($total_kerusakan,0,',','.') }}
-                        </td>
-                    </tr>
-
-                </tbody>
-
-            </table>
-        </div>
-    @else
-        <p class="mb-6 text-slate-400">Tidak ada kerusakan</p>
-    @endif
-
-    {{-- BARANG HILANG --}}
-<h3 class="font-semibold text-slate-700 mb-2">Denda Barang Hilang</h3>
-
-@php $total_hilang = 0; @endphp
-
-@if($transaksi->barangHilang->count())
-    <div class="overflow-x-auto mb-6">
-        <table class="w-full text-sm border border-slate-200">
-
-            <thead class="bg-slate-100 text-slate-600 text-xs uppercase">
+        <table class="w-full text-sm border mb-6">
+            <thead class="bg-slate-100 text-xs uppercase">
                 <tr>
                     <th class="p-2 border text-left">Barang</th>
                     <th class="p-2 border text-center">Qty</th>
                     <th class="p-2 border text-right">Denda</th>
                 </tr>
             </thead>
+            <tbody>
+                @foreach($transaksi->kerusakan as $k)
+                <tr>
+                    <td class="p-2 border">{{ $k->barang->nama_barang }}</td>
+                    <td class="p-2 border text-center">{{ $k->qty }}</td>
+                    <td class="p-2 border text-right text-red-500">
+                        Rp {{ number_format($k->total_denda,0,',','.') }}
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @else
+        <p class="mb-6 text-slate-400">Tidak ada kerusakan</p>
+    @endif
 
+
+    {{-- BARANG HILANG --}}
+    <h3 class="font-semibold text-slate-700 mb-2">Denda Barang Hilang</h3>
+
+    @if($transaksi->barangHilang->count())
+        <table class="w-full text-sm border mb-6">
+            <thead class="bg-slate-100 text-xs uppercase">
+                <tr>
+                    <th class="p-2 border text-left">Barang</th>
+                    <th class="p-2 border text-center">Qty</th>
+                    <th class="p-2 border text-right">Denda</th>
+                </tr>
+            </thead>
             <tbody>
                 @foreach($transaksi->barangHilang as $h)
-                @php $total_hilang += $h->denda; @endphp
-                <tr class="border-t">
+                <tr>
                     <td class="p-2 border">{{ $h->barang->nama_barang }}</td>
                     <td class="p-2 border text-center">{{ $h->qty }}</td>
                     <td class="p-2 border text-right text-red-500">
@@ -189,27 +162,14 @@
                     </td>
                 </tr>
                 @endforeach
-
-                <tr class="font-semibold bg-slate-50">
-                    <td colspan="2" class="p-2 border text-right">Total</td>
-                    <td class="p-2 border text-right text-red-500">
-                        Rp {{ number_format($total_hilang,0,',','.') }}
-                    </td>
-                </tr>
-
             </tbody>
-
         </table>
-    </div>
-@else
-    <p class="mb-6 text-slate-400">Tidak ada barang hilang</p>
-@endif
+    @else
+        <p class="mb-6 text-slate-400">Tidak ada barang hilang</p>
+    @endif
+
 
     {{-- TOTAL --}}
-    @php
-        $total_denda = $total_keterlambatan + $total_kerusakan + $total_hilang;
-    @endphp
-
     <div class="bg-slate-50 border rounded-lg p-4 text-sm space-y-2">
 
         <div class="flex justify-between">
@@ -226,19 +186,19 @@
             </span>
         </div>
 
+        <div class="flex justify-between">
+            <span>Denda Barang Hilang</span>
+            <span class="text-red-500">
+                Rp {{ number_format($total_hilang,0,',','.') }}
+            </span>
+        </div>
+
         <div class="flex justify-between font-bold text-lg border-t pt-2">
             <span>Total Denda</span>
             <span class="text-red-600">
                 Rp {{ number_format($total_denda,0,',','.') }}
             </span>
         </div>
-
-        <div class="flex justify-between">
-    <span>Denda Barang Hilang</span>
-    <span class="text-red-500">
-        Rp {{ number_format($total_hilang,0,',','.') }}
-    </span>
-</div>
 
     </div>
 

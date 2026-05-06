@@ -7,46 +7,85 @@
         body{
             font-family: Arial, Helvetica, sans-serif;
             padding:40px;
+            color:#333;
         }
 
         .container{
-            width:700px;
+            max-width:700px;
             margin:auto;
         }
 
-        h2{
-            text-align:center;
-            margin-bottom:30px;
+        .header{
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            border-bottom:1px solid #ddd;
+            padding-bottom:10px;
+            margin-bottom:20px;
+        }
+
+        .title{
+            font-size:20px;
+            font-weight:bold;
+        }
+
+        .small{
+            font-size:12px;
+            color:#777;
         }
 
         table{
             width:100%;
             border-collapse: collapse;
-            margin-top:20px;
+            margin-top:10px;
         }
 
-        table, th, td{
-            border:1px solid black;
+        th{
+            background:#f5f5f5;
+            font-size:12px;
+            text-transform:uppercase;
+            color:#555;
         }
 
         th, td{
             padding:8px;
+            text-align:left;
+            border-bottom:1px solid #eee;
+        }
+
+        .right{
+            text-align:right;
+        }
+
+        .center{
             text-align:center;
         }
 
-        .no-border td{
-            border:none;
-            text-align:left;
-            padding:4px;
+        .section{
+            margin-top:25px;
         }
 
-        .total{
+        .total-box{
+            margin-top:20px;
+            padding:10px;
+            border-top:2px solid #000;
             font-weight:bold;
-            font-size:18px;
+            font-size:16px;
+        }
+
+        .text-red{
+            color:#c0392b;
+        }
+
+        .footer{
+            margin-top:50px;
+            text-align:right;
         }
 
         hr{
             margin:25px 0;
+            border:none;
+            border-top:1px dashed #ccc;
         }
 
     </style>
@@ -56,115 +95,127 @@
 
 <div class="container">
 
-<h2>NOTA DENDA</h2>
+    {{-- HEADER --}}
+    <div class="header">
+        <div>
+            <div class="title">NOTA DENDA</div>
+            <div class="small">Sistem Persewaan</div>
+        </div>
 
-<table class="no-border">
+        <div class="small right">
+            <div>No: INV-DENDA-{{ date('Ymd') }}-{{ $transaksi->id }}</div>
+            <div>{{ now()->format('d M Y') }}</div>
+        </div>
+    </div>
 
-<tr>
-<td width="200">ID Transaksi</td>
-<td>: {{ $transaksi->id }}</td>
-</tr>
+    {{-- INFO --}}
+    <table>
+        <tr>
+            <td width="200">ID Transaksi</td>
+            <td>: {{ $transaksi->id }}</td>
+        </tr>
+        <tr>
+            <td>Nama Penyewa</td>
+            <td>: {{ $transaksi->user->name }}</td>
+        </tr>
+        <tr>
+            <td>Tanggal Pinjam</td>
+            <td>: {{ \Carbon\Carbon::parse($transaksi->tanggal_pinjam)->format('d M Y') }}</td>
+        </tr>
+        <tr>
+            <td>Tanggal Kembali</td>
+            <td>: {{ $transaksi->tanggal_kembali_real 
+                ? \Carbon\Carbon::parse($transaksi->tanggal_kembali_real)->format('d M Y') 
+                : '-' }}</td>
+        </tr>
+    </table>
 
-<tr>
-<td>Nama Penyewa</td>
-<td>: {{ $transaksi->user->name }}</td>
-</tr>
+    {{-- KETERLAMBATAN --}}
+    <div class="section">
+        <h4>Denda Keterlambatan</h4>
 
-<tr>
-<td>Tanggal Pinjam</td>
-<td>: {{ $transaksi->tanggal_pinjam }}</td>
-</tr>
+        @php $total_telat = 0; @endphp
 
-<tr>
-<td>Tanggal Kembali</td>
-<td>: {{ $transaksi->tanggal_kembali_real }}</td>
-</tr>
+        @if($transaksi->keterlambatan->count())
 
-</table>
+        <table>
+            <tr>
+                <th>Durasi</th>
+                <th class="right">Denda</th>
+            </tr>
 
-<hr>
+            @foreach($transaksi->keterlambatan as $k)
+            @php $total_telat += $k->total_denda; @endphp
+            <tr>
+                <td>{{ $k->durasi_hari }} hari</td>
+                <td class="right text-red">
+                    Rp {{ number_format($k->total_denda,0,',','.') }}
+                </td>
+            </tr>
+            @endforeach
 
-<h3>Denda Keterlambatan</h3>
+        </table>
 
-@php
-$telat = $transaksi->keterlambatan->first();
-@endphp
+        @else
+        <p class="small">Tidak ada keterlambatan</p>
+        @endif
+    </div>
 
-@if($telat)
+    {{-- KERUSAKAN --}}
+    <div class="section">
+        <h4>Denda Kerusakan</h4>
 
-Telat {{ $telat->durasi_hari }} hari
+        @php $total_rusak = 0; @endphp
 
-Rp {{ number_format($telat->total_denda) }}
+        @if($transaksi->kerusakan->count())
 
-@else
-<p>Tidak ada keterlambatan</p>
+        <table>
+            <tr>
+                <th>Barang</th>
+                <th class="center">Qty</th>
+                <th class="right">Denda</th>
+            </tr>
 
-@endif
+            @foreach($transaksi->kerusakan as $k)
+            @php $total_rusak += $k->total_denda; @endphp
+            <tr>
+                <td>{{ $k->barang->nama_barang }}</td>
+                <td class="center">{{ $k->qty }}</td>
+                <td class="right text-red">
+                    Rp {{ number_format($k->total_denda,0,',','.') }}
+                </td>
+            </tr>
+            @endforeach
 
+        </table>
 
-<h3>Denda Kerusakan</h3>
+        @else
+        <p class="small">Tidak ada kerusakan barang</p>
+        @endif
+    </div>
 
-@if($transaksi->kerusakan->count() > 0)
+    {{-- TOTAL --}}
+    @php
+        $grand_total = $total_telat + $total_rusak;
+    @endphp
 
-<table>
+    <div class="total-box">
+        <div style="display:flex; justify-content:space-between;">
+            <span>Total Denda</span>
+            <span class="text-red">
+                Rp {{ number_format($grand_total,0,',','.') }}
+            </span>
+        </div>
+    </div>
 
-<tr>
-<th>Barang</th>
-<th>Qty Rusak</th>
-<th>Denda</th>
-</tr>
-
-@foreach($transaksi->kerusakan as $k)
-
-<tr>
-<td>{{ $k->barang->nama_barang }}</td>
-<td>{{ $k->qty }}</td>
-<td>Rp {{ number_format($k->total_denda) }}</td>
-</tr>
-
-@endforeach
-
-</table>
-
-@else
-
-<p>Tidak ada kerusakan barang</p>
-
-@endif
-
-
-<hr>
-
-<table>
-
-<tr class="total">
-<td>Total Denda</td>
-<td>
-
-Rp {{
-    number_format(
-        $transaksi->kerusakan->sum('total_denda')
-        +
-        $transaksi->keterlambatan->sum('total_denda')
-    )
-}}
-
-</td>
-</tr>
-
-</table>
-
-
-<br><br>
-
-<p style="text-align:right;">
-Petugas
-<br><br><br>
-____________________
-</p>
+    {{-- FOOTER --}}
+    <div class="footer">
+        <p>Petugas</p>
+        <br><br><br>
+        <p>____________________</p>
+    </div>
 
 </div>
-
 
 <script>
 window.print();

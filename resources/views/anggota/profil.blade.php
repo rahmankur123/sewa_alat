@@ -12,10 +12,21 @@
         </h2>
     </div>
 
-    {{-- NOTIF --}}
+    {{-- NOTIF SUCCESS --}}
     @if(session('success'))
     <div class="mb-4 p-4 rounded-lg bg-green-100 text-green-700 border border-green-300">
         {{ session('success') }}
+    </div>
+    @endif
+
+    {{-- ERROR --}}
+    @if ($errors->any())
+    <div class="mb-4 p-4 rounded-lg bg-red-100 text-red-700 border border-red-300">
+        <ul class="list-disc pl-5 text-sm">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
     </div>
     @endif
 
@@ -30,11 +41,13 @@
 
                 {{-- FOTO --}}
                 <div class="col-span-2 text-center">
-                    <img src="{{ $user->foto ? asset('storage/'.$user->foto) : asset('img/default.png') }}"
-                         class="w-32 h-32 object-cover rounded-full mx-auto mb-3 border">
+                    <img id="preview"
+                        src="{{ $user->foto ? asset('storage/'.$user->foto) : asset('img/default.png') }}"
+                        class="w-32 h-32 object-cover rounded-full mx-auto mb-3 border">
 
                     <input type="file" name="foto"
-                        class="text-sm">
+                        class="text-sm"
+                        onchange="previewImage(event)">
                 </div>
 
                 {{-- NAMA --}}
@@ -87,6 +100,7 @@
             <div class="flex justify-end gap-2 mt-6">
 
                 <button type="submit"
+                    onclick="this.disabled=true; this.innerText='Menyimpan...'; this.form.submit();"
                     class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                     Simpan Perubahan
                 </button>
@@ -98,5 +112,16 @@
     </div>
 
 </div>
+
+{{-- PREVIEW FOTO --}}
+<script>
+function previewImage(e){
+    const reader = new FileReader();
+    reader.onload = function(){
+        document.getElementById('preview').src = reader.result;
+    }
+    reader.readAsDataURL(e.target.files[0]);
+}
+</script>
 
 @endsection

@@ -1,107 +1,122 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6">
+<div class="max-w-7xl mx-auto p-4 md:p-6">
 
     <!-- HEADER -->
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-semibold text-slate-700">
-            Katalog Barang Sewa
-        </h1>
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-6">
+        <div>
+            <h1 class="text-xl md:text-2xl font-semibold text-gray-800">
+                Katalog Barang
+            </h1>
+            <p class="text-sm text-gray-500">
+                Daftar alat yang tersedia untuk disewa
+            </p>
+        </div>
 
         <a href="{{ route('barang.create') }}" 
-           class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition">
+           class="bg-indigo-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-indigo-700 transition w-fit">
             + Tambah Barang
         </a>
     </div>
 
     <!-- FILTER -->
     <form method="GET" 
-        class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-3 items-center">
+        class="bg-white p-4 md:p-5 rounded-2xl shadow mb-6 flex flex-col md:flex-row flex-wrap gap-3 md:items-end">
 
-        <input type="text" name="search" value="{{ request('search') }}"
-            placeholder="Cari barang..."
-            class="border px-3 py-2 rounded-lg w-full md:w-1/4 text-sm focus:ring-2 focus:ring-slate-400">
+        <div class="flex flex-col">
+            <label class="text-xs text-gray-500 mb-1">Cari</label>
+            <input type="text" name="search" value="{{ request('search') }}"
+                placeholder="Nama barang..."
+                class="bg-gray-50 px-3 py-2 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none transition">
+        </div>
 
-        <select name="status" class="border px-3 py-2 rounded-lg text-sm">
-            <option value="">Semua Status</option>
-            <option value="tersedia" {{ request('status')=='tersedia'?'selected':'' }}>Tersedia</option>
-            <option value="rusak" {{ request('status')=='rusak'?'selected':'' }}>Rusak</option>
-            <option value="tidak_tersedia" {{ request('status')=='tidak_tersedia'?'selected':'' }}>Tidak Tersedia</option>
-        </select>
+        <div class="flex flex-col">
+            <label class="text-xs text-gray-500 mb-1">Status</label>
+            <select name="status"
+                class="bg-gray-50 px-3 py-2 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
+                <option value="">Semua</option>
+                <option value="tersedia" {{ request('status')=='tersedia'?'selected':'' }}>Tersedia</option>
+                <option value="rusak" {{ request('status')=='rusak'?'selected':'' }}>Rusak</option>
+                <option value="tidak_tersedia" {{ request('status')=='tidak_tersedia'?'selected':'' }}>Tidak Tersedia</option>
+            </select>
+        </div>
 
-        <input type="number" name="min_harga"
-            placeholder="Min"
-            value="{{ request('min_harga') }}"
-            class="border px-3 py-2 rounded-lg w-24 text-sm">
+        <div class="flex flex-col">
+            <label class="text-xs text-gray-500 mb-1">Harga</label>
+            <div class="flex gap-2">
+                <input type="number" name="min_harga" placeholder="Min"
+                    value="{{ request('min_harga') }}"
+                    class="bg-gray-50 px-3 py-2 rounded-lg w-24 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-400">
 
-        <input type="number" name="max_harga"
-            placeholder="Max"
-            value="{{ request('max_harga') }}"
-            class="border px-3 py-2 rounded-lg w-24 text-sm">
+                <input type="number" name="max_harga" placeholder="Max"
+                    value="{{ request('max_harga') }}"
+                    class="bg-gray-50 px-3 py-2 rounded-lg w-24 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-400">
+            </div>
+        </div>
 
-        <button class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-slate-700">
+        <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 transition h-fit">
             Filter
         </button>
 
     </form>
 
     <!-- GRID -->
-    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
 
         @forelse($barang as $b)
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden 
-                    hover:shadow-lg hover:-translate-y-1 transition duration-300">
+        <div class="bg-white rounded-2xl shadow overflow-hidden 
+                    hover:shadow-md hover:-translate-y-1 transition duration-300">
 
             <!-- FOTO -->
-            <img src="{{ $b->foto ? asset('storage/'.$b->foto) : asset('img/default.png') }}"
-                 class="h-40 w-full object-cover">
+            <div class="h-40 w-full overflow-hidden">
+                <img src="{{ $b->foto ? asset('storage/'.$b->foto) : asset('img/default.png') }}"
+                     class="h-full w-full object-cover hover:scale-105 transition duration-300">
+            </div>
 
             <div class="p-4 space-y-2">
 
                 <!-- NAMA -->
-                <h2 class="font-semibold text-lg text-slate-700 line-clamp-1">
+                <h2 class="font-semibold text-gray-800 line-clamp-1">
                     {{ $b->nama_barang }}
                 </h2>
 
                 <!-- DESKRIPSI -->
-                <p class="text-sm text-slate-500 line-clamp-2">
+                <p class="text-xs text-gray-500 line-clamp-2">
                     {{ $b->deskripsi ?? '-' }}
                 </p>
 
                 <!-- INFO -->
-                <div class="flex justify-between text-sm font-medium">
-                    <span class="text-blue-600">
-                        Rp {{ number_format($b->harga_per_hari,0,',','.') }}/hari
+                <div class="flex justify-between items-center text-sm mt-2">
+                    <span class="font-semibold text-indigo-600">
+                        Rp {{ number_format($b->harga_per_hari,0,',','.') }}
                     </span>
-                    <span class="text-slate-500">
+                    <span class="text-gray-400 text-xs">
                         Stok: {{ $b->stok }}
                     </span>
                 </div>
 
                 <!-- STATUS -->
-                <span class="inline-block px-2 py-1 text-xs rounded-full
-                    {{ $b->status=='tersedia' ? 'bg-green-100 text-green-700' : '' }}
-                    {{ $b->status=='rusak' ? 'bg-red-100 text-red-700' : '' }}
-                    {{ $b->status=='tidak_tersedia' ? 'bg-gray-100 text-gray-700' : '' }}">
-                    {{ strtoupper($b->status) }}
+                <span class="inline-block px-2 py-1 text-xs rounded-full font-medium
+                    {{ $b->status=='tersedia' ? 'bg-green-100 text-green-600' : '' }}
+                    {{ $b->status=='rusak' ? 'bg-red-100 text-red-600' : '' }}
+                    {{ $b->status=='tidak_tersedia' ? 'bg-gray-100 text-gray-600' : '' }}">
+                    {{ ucfirst($b->status) }}
                 </span>
 
                 <!-- ACTION -->
                 <div class="flex gap-2 mt-3">
 
-                    {{-- EDIT --}}
                     <a href="{{ route('barang.edit',$b->id) }}"
-                       class="flex-1 text-center bg-yellow-500 text-white px-3 py-1 rounded text-xs hover:bg-yellow-600">
+                       class="flex-1 text-center bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg text-xs hover:bg-indigo-100">
                         Edit
                     </a>
 
-                    {{-- DELETE --}}
                     <form action="{{ route('barang.destroy',$b->id) }}" method="POST" class="flex-1">
                         @csrf
                         @method('DELETE')
                         <button onclick="return confirm('Hapus barang?')"
-                            class="w-full bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700">
+                            class="w-full bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-red-600">
                             Hapus
                         </button>
                     </form>
@@ -112,7 +127,7 @@
         </div>
 
         @empty
-        <div class="col-span-full text-center text-slate-400 py-10">
+        <div class="col-span-full text-center text-gray-400 py-10">
             Tidak ada barang
         </div>
         @endforelse
@@ -120,7 +135,7 @@
     </div>
 
     <!-- PAGINATION -->
-    <div class="mt-6">
+    <div class="mt-8">
         {{ $barang->links() }}
     </div>
 

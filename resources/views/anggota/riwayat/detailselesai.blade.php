@@ -20,7 +20,7 @@
 
 <div class="print-area max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-sm border border-slate-200">
 
-    {{-- HEADER --}}
+    {{-- ================= HEADER ================= --}}
     <div class="flex justify-between items-center border-b pb-4 mb-6">
         <div>
             <h2 class="text-xl font-bold text-slate-800">NOTA SEWA</h2>
@@ -38,7 +38,7 @@
         </div>
     </div>
 
-    {{-- INFO --}}
+    {{-- ================= INFO ================= --}}
     <div class="grid grid-cols-2 gap-6 text-sm mb-6">
 
         <div>
@@ -78,11 +78,22 @@
 
     </div>
 
-    {{-- BARANG --}}
+    {{-- ================= HITUNG TOTAL ================= --}}
+    @php
+        $total_sewa = $transaksi->detail->sum('subtotal');
+        $denda_telat = $transaksi->keterlambatan->sum('total_denda');
+        $denda_rusak = $transaksi->kerusakan->sum('total_denda');
+        $denda_hilang = $transaksi->barangHilang->sum('denda');
+
+        $total_denda = $denda_telat + $denda_rusak + $denda_hilang;
+        $total_bayar = $total_sewa + $total_denda;
+    @endphp
+
+    {{-- ================= BARANG ================= --}}
     <h3 class="font-semibold text-slate-700 mb-2">Detail Barang</h3>
 
-    <table class="w-full text-sm mb-6 border border-slate-200">
-        <thead class="bg-slate-100 text-slate-600 text-xs uppercase">
+    <table class="w-full text-sm mb-6 border">
+        <thead class="bg-slate-100 text-xs uppercase">
             <tr>
                 <th class="p-2 border text-left">Barang</th>
                 <th class="p-2 border text-center">Qty</th>
@@ -92,13 +103,7 @@
         </thead>
 
         <tbody>
-        @php $total_sewa = 0; @endphp
-
         @forelse($transaksi->detail as $d)
-            @php
-                $total_sewa += $d->subtotal;
-            @endphp
-
             <tr>
                 <td class="p-2 border">{{ $d->barang->nama_barang }}</td>
                 <td class="p-2 border text-center">{{ $d->qty }}</td>
@@ -127,14 +132,13 @@
         </tbody>
     </table>
 
-    {{-- DENDA --}}
+    {{-- ================= DENDA ================= --}}
     <div class="grid grid-cols-3 gap-6 mb-6 text-sm">
 
-        {{-- KETERLAMBATAN --}}
+        {{-- TELAT --}}
         <div>
-            <h4 class="font-semibold text-slate-700 mb-2">Keterlambatan</h4>
-
-            @forelse($transaksi->keterlambatan ?? [] as $k)
+            <h4 class="font-semibold mb-2">Keterlambatan</h4>
+            @forelse($transaksi->keterlambatan as $k)
                 <div class="flex justify-between border-b py-1">
                     <span>{{ $k->durasi_hari }} hari</span>
                     <span class="text-red-500">
@@ -146,11 +150,10 @@
             @endforelse
         </div>
 
-        {{-- KERUSAKAN --}}
+        {{-- RUSAK --}}
         <div>
-            <h4 class="font-semibold text-slate-700 mb-2">Kerusakan</h4>
-
-            @forelse($transaksi->kerusakan ?? [] as $k)
+            <h4 class="font-semibold mb-2">Kerusakan</h4>
+            @forelse($transaksi->kerusakan as $k)
                 <div class="flex justify-between border-b py-1">
                     <span>{{ $k->barang->nama_barang }} ({{ $k->qty }})</span>
                     <span class="text-red-500">
@@ -164,9 +167,8 @@
 
         {{-- HILANG --}}
         <div>
-            <h4 class="font-semibold text-slate-700 mb-2">Barang Hilang</h4>
-
-            @forelse($transaksi->hilang ?? [] as $h)
+            <h4 class="font-semibold mb-2">Barang Hilang</h4>
+            @forelse($transaksi->barangHilang as $h)
                 <div class="flex justify-between border-b py-1">
                     <span>{{ $h->barang->nama_barang }} ({{ $h->qty }})</span>
                     <span class="text-red-500">
@@ -180,16 +182,7 @@
 
     </div>
 
-    {{-- TOTAL --}}
-    @php
-        $total_denda =
-            ($transaksi->kerusakan->sum('total_denda') ?? 0) +
-            ($transaksi->keterlambatan->sum('total_denda') ?? 0) +
-            ($transaksi->hilang->sum('denda') ?? 0);
-
-        $total_bayar = $total_sewa + $total_denda;
-    @endphp
-
+    {{-- ================= TOTAL ================= --}}
     <div class="bg-slate-50 border rounded-lg p-4 text-sm space-y-2">
 
         <div class="flex justify-between">
@@ -213,7 +206,7 @@
 
     </div>
 
-    {{-- FOOTER --}}
+    {{-- ================= FOOTER ================= --}}
     <div class="mt-10 flex justify-between text-sm">
 
         <div>

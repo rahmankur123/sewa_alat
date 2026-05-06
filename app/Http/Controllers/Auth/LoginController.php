@@ -31,15 +31,15 @@ public function proses(Request $request)
         $role = Auth::user()->role;
 
         if($role == 'pemilik'){
-            return redirect()->route('pemilik.dashboard');
+            return view('dashboard.admin');
         }
 
         if($role == 'petugas'){
-            return redirect()->route('petugas.dashboard');
+            return view('dashboard.index');
         }
 
         if($role == 'anggota'){
-            return redirect()->route('anggota.dashboard');
+            return view('dashboard.anggota');
         }
 
     }

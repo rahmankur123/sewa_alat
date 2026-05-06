@@ -3,47 +3,93 @@
 
 @section('content')
 
-<h2 class="text-2xl font-semibold text-slate-700 mb-6">
-    Data Barang Hilang
-</h2>
+<div class="max-w-6xl mx-auto">
 
-<div class="bg-white shadow rounded-xl border border-slate-200">
+    {{-- HEADER --}}
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h2 class="text-xl md:text-2xl font-semibold text-gray-800">
+                Data Barang Hilang
+            </h2>
+            <p class="text-sm text-gray-500">
+                Daftar barang yang hilang dalam transaksi
+            </p>
+        </div>
+    </div>
 
-    <table class="w-full text-sm">
-        <thead class="bg-slate-100 text-slate-600">
-            <tr>
-                <th class="p-3 text-left">No</th>
-                <th class="p-3 text-left">Penyewa</th>
-                <th class="p-3 text-left">Barang</th>
-                <th class="p-3 text-left">Qty</th>
-                <th class="p-3 text-left">Denda</th>
-                <th class="p-3 text-left">Tanggal</th>
-            </tr>
-        </thead>
+    {{-- CARD --}}
+    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
 
-        <tbody>
-            @forelse($data as $i => $item)
-            <tr class="border-t">
-                <td class="p-3">{{ $i + 1 }}</td>
-                <td class="p-3">{{ $item->transaksi->user->name }}</td>
-                <td class="p-3">{{ $item->barang->nama_barang }}</td>
-                <td class="p-3">{{ $item->qty }}</td>
-                <td class="p-3 text-red-600 font-semibold">
-                    Rp {{ number_format($item->denda) }}
-                </td>
-                <td class="p-3">
-                    {{ $item->created_at->format('d-m-Y') }}
-                </td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="6" class="text-center p-4 text-slate-400">
-                    Tidak ada data
-                </td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+
+                <thead class="bg-gray-100 text-gray-600 text-xs uppercase">
+                    <tr>
+                        <th class="px-6 py-3 text-left">No</th>
+                        <th class="px-6 py-3 text-left">Penyewa</th>
+                        <th class="px-6 py-3 text-left">Barang</th>
+                        <th class="px-6 py-3 text-center">Qty</th>
+                        <th class="px-6 py-3 text-right">Denda</th>
+                        <th class="px-6 py-3 text-left">Tanggal</th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y">
+
+                    @forelse($data as $item)
+                    <tr class="hover:bg-gray-50 transition">
+
+                        {{-- NOMOR --}}
+                        <td class="px-6 py-4">
+                            {{ ($data->currentPage() - 1) * $data->perPage() + $loop->iteration }}
+                        </td>
+
+                        {{-- PENYEWA --}}
+                        <td class="px-6 py-4 font-medium text-gray-700">
+                            {{ $item->transaksi->user->name }}
+                        </td>
+
+                        {{-- BARANG --}}
+                        <td class="px-6 py-4">
+                            {{ $item->barang->nama_barang }}
+                        </td>
+
+                        {{-- QTY --}}
+                        <td class="px-6 py-4 text-center">
+                            {{ $item->qty }}
+                        </td>
+
+                        {{-- DENDA --}}
+                        <td class="px-6 py-4 text-right font-semibold text-red-500">
+                            Rp {{ number_format($item->denda,0,',','.') }}
+                        </td>
+
+                        {{-- TANGGAL --}}
+                        <td class="px-6 py-4 text-gray-500">
+                            {{ $item->created_at->format('d M Y') }}
+                        </td>
+
+                    </tr>
+
+                    @empty
+                    <tr>
+                        <td colspan="6" class="text-center py-10 text-gray-400">
+                            Tidak ada data barang hilang
+                        </td>
+                    </tr>
+                    @endforelse
+
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+
+    {{-- PAGINATION --}}
+    <div class="mt-6">
+        {{ $data->links() }}
+    </div>
 
 </div>
 
