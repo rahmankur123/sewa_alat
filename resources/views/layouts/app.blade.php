@@ -49,13 +49,6 @@
 
     <div class="flex-1 flex flex-col">
 
-        {{-- Header --}}
-
-            <!-- tombol mobile -->
-            <button @click="open = true" class="md:hidden text-gray-700 text-xl">
-                ☰
-            </button>
-
             @include('partials.header')
 
         {{-- CONTENT --}}

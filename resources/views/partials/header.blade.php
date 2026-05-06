@@ -2,10 +2,17 @@
 
     {{-- LEFT --}}
     <div class="flex items-center gap-3">
+
+        <!-- tombol mobile -->
+        <button @click="open = true" class="md:hidden text-gray-700 text-xl">
+            ☰
+        </button>
+
         <img 
             src="{{ asset('/storage/logo.jpg') }}" 
             class="w-9 h-9 object-contain"
         >
+
         <h1 class="font-semibold text-gray-800 text-lg hidden sm:block">
             Sistem Persewaan
         </h1>
