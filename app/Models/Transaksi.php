@@ -33,4 +33,13 @@ public function keterlambatan()
 {
     return $this->hasMany(Keterlambatan::class);
 }
+
+public function barangHilang()
+{
+    return $this->hasMany(BarangHilang::class);
+}
+public function hilang()
+{
+    return $this->hasMany(BarangHilang::class);
+}
 }

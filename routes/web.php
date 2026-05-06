@@ -4,9 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Petugas\BarangController;
 use App\Http\Controllers\Petugas\TransaksiController;
 use App\Http\Controllers\Petugas\UserController;
-use App\Http\Controllers\Pemilik\LaporanController;
 use App\Http\Controllers\User\SewaController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LaporanController;
+
 
 
 Route::get('/',[LoginController::class,'form']);
@@ -16,10 +18,6 @@ Route::post('/login',[LoginController::class,'proses'])->name('login.proses');
 
 Route::post('/logout',[LoginController::class,'logout'])->name('logout');
 
-Route::get('/dashboard', function () {
-    session(['role' => 'petugas']); // ganti pemilik / anggota
-    return view('dashboard.index');
-});
 
 Route::get('/aktivasi/{token}', [App\Http\Controllers\Auth\AktivasiController::class, 'form']);
 Route::post('/aktivasi/{token}', [App\Http\Controllers\Auth\AktivasiController::class, 'proses']);
@@ -27,13 +25,17 @@ Route::post('/aktivasi/{token}', [App\Http\Controllers\Auth\AktivasiController::
 
 Route::middleware(['auth','role:pemilik'])->prefix('pemilik')->group(function(){
 
-Route::get('/laporan-sewa',[LaporanController::class,'sewa']);
-Route::get('/laporan-denda',[LaporanController::class,'denda']);
-Route::get('/laporan-kerusakan',[LaporanController::class,'kerusakan']);
+Route::get('/dashboard',[DashboardController::class,'admin']);
+Route::get('/laporan', [LaporanController::class, 'index'])
+    ->name('laporan.index');
+
 
 });
 
 Route::middleware(['auth','role:petugas'])->prefix('petugas')->group(function(){
+
+
+    Route::get('/dashboard',[DashboardController::class,'admin']);
 
     Route::get('/transaksi/create', [TransaksiController::class,'create'])->name('petugas.transaksi.create');
 
@@ -56,6 +58,8 @@ Route::middleware(['auth','role:petugas'])->prefix('petugas')->group(function(){
     Route::get('/transaksi/selesai',[TransaksiController::class,'selesai'])->name('petugas.transaksi.selesai');
 
     Route::get('/transaksi/tersewa',[TransaksiController::class,'tersewa'])->name('petugas.transaksi.tersewa');
+
+    Route::get('/transaksi/hilang',[TransaksiController::class,'barangHilang'])->name('petugas.transaksi.hilang');
 
     Route::post('/transaksi/tersewa/{id}', [TransaksiController::class,'diambil'])->name('petugas.transaksi.diambil');
 
@@ -86,9 +90,15 @@ Route::middleware(['auth','role:petugas'])->prefix('petugas')->group(function(){
     'destroy' => 'user.destroy',
     ]);
 
+    Route::get('/laporan', [LaporanController::class, 'index'])
+    ->name('laporan.index');
+
+
 });
 
 Route::middleware(['auth','role:anggota'])->prefix('anggota')->group(function(){
+
+    Route::get('/dashboard',[DashboardController::class,'anggota'])->name('anggota.dashboard');
 
     Route::get('/sewa',[SewaController::class,'index'])->name('anggota.sewa');
 
@@ -103,6 +113,8 @@ Route::middleware(['auth','role:anggota'])->prefix('anggota')->group(function(){
     Route::get('/riwayat/dipinjam',[SewaController::class,'dipinjam'])->name('riwayat.dipinjam');
 
     Route::get('/riwayat/terdenda',[SewaController::class,'terdenda'])->name('riwayat.terdenda');
+
+    Route::get('/riwayat/hilang',[SewaController::class,'Hilang'])->name('riwayat.hilang');
 
     Route::get('/riwayat/selesai',[SewaController::class,'selesai'])->name('riwayat.selesai');
 

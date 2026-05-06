@@ -95,6 +95,17 @@ public function dipinjam()
 
     return view('anggota.riwayat.dipinjam', compact('data'));
 }
+public function Hilang()
+{
+    $user = Auth::user();
+
+    $data = Transaksi::with('detail.barang')
+            ->where('user_id', $user->id)
+            ->whereIn('status_transaksi',['hilang'])
+            ->paginate(10);
+
+    return view('anggota.riwayat.hilang', compact('data'));
+}
 
 public function terdenda()
 {
@@ -111,10 +122,15 @@ public function selesai()
 {
     $user = Auth::user();
 
-    $data = Transaksi::with('detail.barang')
-            ->where('user_id', $user->id)
-            ->whereIn('status_transaksi',['selesai'])
-            ->paginate(10);
+    $data = Transaksi::with([
+            'detail.barang',
+            'kerusakan',
+            'keterlambatan',
+            'hilang'
+        ])
+        ->where('user_id', $user->id)
+        ->where('status_transaksi','selesai')
+        ->paginate(10);
 
     return view('anggota.riwayat.selesai', compact('data'));
 }
@@ -133,9 +149,13 @@ public function detailDenda($id)
 }
 public function detailSelesai($id)
 {
-    $transaksi = Transaksi::with('detail.barang')->findOrFail($id);
+    $transaksi = Transaksi::with([
+        'detail.barang',
+        'kerusakan',
+        'keterlambatan',
+        'hilang'
+    ])->findOrFail($id);
 
     return view('anggota.riwayat.detailselesai', compact('transaksi'));
 }
-
 }

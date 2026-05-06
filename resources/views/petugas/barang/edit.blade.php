@@ -78,6 +78,14 @@
                     class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400">
             </div>
 
+            {{--Denda Hilang--}}
+            <div>
+                <label class="text-slate-600 mb-1 block">Denda Hilang</label>
+                <input type="number" name="denda_hilang"
+                    value="{{ old('denda_hilang', $barang->denda_hilang) }}"
+                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400">
+            </div>
+
             {{-- DESKRIPSI --}}
             <div class="col-span-2">
                 <label class="text-slate-600 mb-1 block">Deskripsi</label>

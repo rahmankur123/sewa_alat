@@ -47,6 +47,7 @@ class BarangController extends Controller
             'stok' => 'required|integer',
             'harga_per_hari' => 'required|numeric',
             'denda_kerusakan' => 'required|numeric',
+            'denda_hilang' => 'required|numeric',
             'denda_keterlambatan_per_hari' => 'required|numeric',
             'foto' => 'image|mimes:jpg,png,jpeg|max:2048'
         ]);
@@ -79,6 +80,7 @@ class BarangController extends Controller
             'nama_barang' => 'required',
             'stok' => 'required|integer',
             'harga_per_hari' => 'required|numeric',
+            'denda_hilang' => 'required|numeric'
         ]);
 
         $data = $request->all();

@@ -110,6 +110,58 @@ action="{{ route('petugas.transaksi.prosesKembalikan',$transaksi->id) }}">
         </div>
     </div>
 
+    {{-- BARANG HILANG --}}
+<div>
+    <h3 class="font-semibold text-slate-700 mb-4">
+        Barang Hilang
+    </h3>
+
+    <div class="space-y-4">
+
+        @forelse($transaksi->detail as $item)
+
+        <div class="border rounded-lg p-4">
+
+            {{-- NAMA BARANG --}}
+            <div class="flex justify-between items-center mb-2">
+                <p class="font-medium text-slate-700">
+                    {{ $item->barang->nama_barang }}
+                </p>
+
+                <span class="text-sm text-slate-500">
+                    Dipinjam: {{ $item->qty }}
+                </span>
+            </div>
+
+            {{-- INPUT QTY HILANG --}}
+            <div class="mt-2">
+                <label class="text-sm text-slate-600">
+                    Jumlah Hilang
+                </label>
+
+                <input type="number"
+                    name="hilang[{{ $item->barang_id }}]"
+                    min="0"
+                    max="{{ $item->qty }}"
+                    value="0"
+                    class="w-full mt-1 border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-400 outline-none">
+                
+                <p class="text-xs text-slate-400 mt-1">
+                    Maksimal: {{ $item->qty }}
+                </p>
+            </div>
+
+        </div>
+
+        @empty
+        <p class="text-slate-400 text-sm">
+            Tidak ada data barang
+        </p>
+        @endforelse
+
+    </div>
+</div>
+
     {{-- BUTTON --}}
     <div class="flex justify-end">
         <button class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">

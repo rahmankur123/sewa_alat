@@ -4,7 +4,6 @@
 
 @section('content')
 
-{{-- BUTTON --}}
 <div class="no-print mb-4 flex justify-between max-w-4xl mx-auto">
 
     <a href="{{ url()->previous() }}"
@@ -19,7 +18,6 @@
 
 </div>
 
-{{-- NOTA --}}
 <div class="print-area max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-sm border border-slate-200">
 
     {{-- HEADER --}}
@@ -63,9 +61,9 @@
         </div>
 
         <div>
-            <p class="text-slate-500">Tanggal Pinjam Rencana</p>
+            <p class="text-slate-500">Tanggal Kembali Rencana</p>
             <p>
-                {{ \Carbon\Carbon::parse($transaksi->tanggal_rencana_kembali)->translatedFormat('d F Y') }}
+                {{ \Carbon\Carbon::parse($transaksi->tanggal_kembali_rencana)->translatedFormat('d F Y') }}
             </p>
         </div>
 
@@ -98,8 +96,7 @@
 
         @forelse($transaksi->detail as $d)
             @php
-                $subtotal = $d->qty * $d->harga_per_hari;
-                $total_sewa += $subtotal;
+                $total_sewa += $d->subtotal;
             @endphp
 
             <tr>
@@ -109,7 +106,7 @@
                     Rp {{ number_format($d->harga_per_hari,0,',','.') }}
                 </td>
                 <td class="p-2 border text-right">
-                    Rp {{ number_format($subtotal,0,',','.') }}
+                    Rp {{ number_format($d->subtotal,0,',','.') }}
                 </td>
             </tr>
         @empty
@@ -130,14 +127,14 @@
         </tbody>
     </table>
 
-    {{-- DENDA DETAIL --}}
-    <div class="grid grid-cols-2 gap-6 mb-6 text-sm">
+    {{-- DENDA --}}
+    <div class="grid grid-cols-3 gap-6 mb-6 text-sm">
 
         {{-- KETERLAMBATAN --}}
         <div>
-            <h4 class="font-semibold text-slate-700 mb-2">Denda Keterlambatan</h4>
+            <h4 class="font-semibold text-slate-700 mb-2">Keterlambatan</h4>
 
-            @forelse($transaksi->keterlambatan as $k)
+            @forelse($transaksi->keterlambatan ?? [] as $k)
                 <div class="flex justify-between border-b py-1">
                     <span>{{ $k->durasi_hari }} hari</span>
                     <span class="text-red-500">
@@ -151,13 +148,29 @@
 
         {{-- KERUSAKAN --}}
         <div>
-            <h4 class="font-semibold text-slate-700 mb-2">Denda Kerusakan</h4>
+            <h4 class="font-semibold text-slate-700 mb-2">Kerusakan</h4>
 
-            @forelse($transaksi->kerusakan as $k)
+            @forelse($transaksi->kerusakan ?? [] as $k)
                 <div class="flex justify-between border-b py-1">
                     <span>{{ $k->barang->nama_barang }} ({{ $k->qty }})</span>
                     <span class="text-red-500">
                         Rp {{ number_format($k->total_denda,0,',','.') }}
+                    </span>
+                </div>
+            @empty
+                <p class="text-slate-400">Tidak ada</p>
+            @endforelse
+        </div>
+
+        {{-- HILANG --}}
+        <div>
+            <h4 class="font-semibold text-slate-700 mb-2">Barang Hilang</h4>
+
+            @forelse($transaksi->hilang ?? [] as $h)
+                <div class="flex justify-between border-b py-1">
+                    <span>{{ $h->barang->nama_barang }} ({{ $h->qty }})</span>
+                    <span class="text-red-500">
+                        Rp {{ number_format($h->denda,0,',','.') }}
                     </span>
                 </div>
             @empty
@@ -170,8 +183,9 @@
     {{-- TOTAL --}}
     @php
         $total_denda =
-            $transaksi->kerusakan->sum('total_denda') +
-            $transaksi->keterlambatan->sum('total_denda');
+            ($transaksi->kerusakan->sum('total_denda') ?? 0) +
+            ($transaksi->keterlambatan->sum('total_denda') ?? 0) +
+            ($transaksi->hilang->sum('denda') ?? 0);
 
         $total_bayar = $total_sewa + $total_denda;
     @endphp

@@ -17,15 +17,16 @@
     <!-- MENU -->
     <nav class="flex-1 overflow-y-auto px-4 py-4 space-y-1 text-sm">
 
+
+        <!-- PEMILIK -->
+        @if($role == 'pemilik')
+        
         <!-- HOME -->
-        <a href="/dashboard"
+        <a href="/admin/dashboard"
            class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
             <span>🏠</span>
             <span>Home</span>
         </a>
-
-        <!-- PEMILIK -->
-        @if($role == 'pemilik')
 
         <p class="text-xs text-slate-500 mt-4 mb-2 uppercase">Management</p>
 
@@ -46,6 +47,13 @@
 
         <!-- PETUGAS -->
         @if($role == 'petugas')
+        
+        <!-- HOME -->
+        <a href="/petugas/dashboard"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span>🏠</span>
+            <span>Home</span>
+        </a>
 
         <p class="text-xs text-slate-500 mt-4 mb-2 uppercase">Master Data</p>
 
@@ -96,6 +104,10 @@
                     ⚠️ Denda
                 </a>
 
+                <a href="/petugas/transaksi/hilang" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
+                    📦 Barang Hilang
+                </a>
+
                 <a href="/petugas/transaksi/selesai" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
                     ✅ Selesai
                 </a>
@@ -122,15 +134,15 @@
 
             <div x-show="open" x-transition class="ml-6 mt-2 space-y-1 text-sm">
 
-                <a href="#" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
+                <a href="/petugas/laporan" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
                     💰 Denda
                 </a>
 
-                <a href="#" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
+                <a href="/petugas/laporan" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
                     📦 Kerusakan
                 </a>
 
-                <a href="#" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
+                <a href="/petugas/laporan" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
                     📤 Penyewaan
                 </a>
 
@@ -142,6 +154,13 @@
 
         <!-- ANGGOTA -->
         @if($role == 'anggota')
+        
+        <!-- HOME -->
+        <a href="/anggota/dashboard"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span>🏠</span>
+            <span>Home</span>
+        </a>
 
         <p class="text-xs text-slate-500 mt-4 mb-2 uppercase">Menu</p>
 
@@ -179,6 +198,10 @@
 
                 <a href="/anggota/riwayat/terdenda" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
                     ⚠️ Denda
+                </a>
+
+                <a href="/anggota/riwayat/hilang" class="block px-3 py-2 rounded-lg hover:bg-slate-800">
+                    📦 Barang Hilang
                 </a>
 
                 <a href="/anggota/riwayat/selesai" class="block px-3 py-2 rounded-lg hover:bg-slate-800">

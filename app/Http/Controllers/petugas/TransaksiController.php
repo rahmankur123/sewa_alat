@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\TransaksiMail;
 use App\Models\Kerusakan;
 use App\Models\Keterlambatan;
+use App\Models\BarangHilang;
 use DB;
 
 class TransaksiController extends Controller
@@ -176,6 +177,28 @@ public function prosesKembalikan(Request $request,$id)
 
     $total_denda = 0;
 
+    // ================== BARANG HILANG ==================
+if($request->hilang){
+    foreach($request->hilang as $barang_id => $qty_hilang){
+
+        if($qty_hilang > 0){
+
+            $barang = Barang::find($barang_id);
+
+            $denda = $barang->denda_hilang * $qty_hilang;
+
+            $total_denda += $denda;
+
+            BarangHilang::create([
+                'transaksi_id' => $transaksi->id,
+                'barang_id' => $barang_id,
+                'qty' => $qty_hilang,
+                'denda' => $denda
+            ]);
+        }
+    }
+}
+
     // cek keterlambatan
 if($tanggal_real > $tanggal_rencana){
 
@@ -228,9 +251,15 @@ if($tanggal_real > $tanggal_rencana){
 foreach($transaksi->detail as $detail){
 
     $barang = $detail->barang;
+    $hilangData = $request->hilang ?? [];
 
-    // kembalikan stok
-    $barang->increment('stok', $detail->qty);
+    $qty_hilang = $hilangData[$barang->id] ?? 0;
+
+    $qty_kembali = $detail->qty - $qty_hilang;
+
+    if($qty_kembali > 0){
+        $barang->increment('stok', $qty_kembali);
+    }
 }
     // update transaksi
     $transaksi->tanggal_kembali_real = $tanggal_real;
@@ -238,8 +267,10 @@ foreach($transaksi->detail as $detail){
 
     if($total_denda > 0){
         $transaksi->status_transaksi = 'terdenda';
+        $transaksi->status_pembayaran = 'belum_bayar';
     }else{
         $transaksi->status_transaksi = 'selesai';
+        $transaksi->status_pembayaran = 'lunas';
     }
 
     $transaksi->save();
@@ -297,7 +328,7 @@ public function lunas($id)
         'keterlambatan'
     ])
     ->where('status_transaksi','terdenda')
-    ->get();
+    ->paginate(10);
     return view('petugas.transaksi.terdenda', compact('data'));
 }
 
@@ -327,6 +358,19 @@ public function notaSelesai($id)
     ])->findOrFail($id);
 
     return view('petugas.transaksi.nota_selesai', compact('transaksi'));
+}
+
+public function barangHilang(Request $request)
+{
+    $query = BarangHilang::with(['transaksi.user','barang']);
+
+    if ($request->search) {
+        $query->whereHas('transaksi.user', function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->search . '%');
+        });
+    }
+    $data = $query->latest()->paginate(10)->withQueryString();
+    return view('petugas.transaksi.hilang', compact('data'));
 }
 public function tersewa(Request $request)
 {
@@ -382,6 +426,7 @@ public function hapus($id)
     $transaksi->detail()->delete();
     $transaksi->kerusakan()->delete();
     $transaksi->keterlambatan()->delete();
+    $transaksi->barangHilang()->delete();
 
     $transaksi->delete();
 

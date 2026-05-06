@@ -161,9 +161,53 @@
         <p class="mb-6 text-slate-400">Tidak ada kerusakan</p>
     @endif
 
+    {{-- BARANG HILANG --}}
+    <h3 class="font-semibold text-slate-700 mb-2">Denda Barang Hilang</h3>
+
+    @php $total_hilang = 0; @endphp
+
+    @if($transaksi->barangHilang->count())
+        <div class="overflow-x-auto mb-6">
+            <table class="w-full text-sm border border-slate-200">
+
+                <thead class="bg-slate-100 text-slate-600 text-xs uppercase">
+                    <tr>
+                        <th class="p-2 border text-left">Barang</th>
+                        <th class="p-2 border text-center">Qty</th>
+                        <th class="p-2 border text-right">Denda</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach($transaksi->barangHilang as $h)
+                    @php $total_hilang += $h->denda; @endphp
+                    <tr class="border-t">
+                        <td class="p-2 border">{{ $h->barang->nama_barang }}</td>
+                        <td class="p-2 border text-center">{{ $h->qty }}</td>
+                        <td class="p-2 border text-right text-red-500">
+                            Rp {{ number_format($h->denda,0,',','.') }}
+                        </td>
+                    </tr>
+                    @endforeach
+
+                    <tr class="font-semibold bg-slate-50">
+                        <td colspan="2" class="p-2 border text-right">Total</td>
+                        <td class="p-2 border text-right text-red-500">
+                            Rp {{ number_format($total_hilang,0,',','.') }}
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+        </div>
+    @else
+        <p class="mb-6 text-slate-400">Tidak ada barang hilang</p>
+    @endif
+
     {{-- TOTAL --}}
     @php
-        $total_denda = $total_keterlambatan + $total_kerusakan;
+        $total_denda = $total_keterlambatan + $total_kerusakan + $total_hilang;
     @endphp
 
     <div class="bg-slate-50 border rounded-lg p-4 text-sm space-y-2">
@@ -179,6 +223,13 @@
             <span>Denda Kerusakan</span>
             <span class="text-red-500">
                 Rp {{ number_format($total_kerusakan,0,',','.') }}
+            </span>
+        </div>
+
+        <div class="flex justify-between">
+            <span>Denda Barang Hilang</span>
+            <span class="text-red-500">
+                Rp {{ number_format($total_hilang,0,',','.') }}
             </span>
         </div>
 
