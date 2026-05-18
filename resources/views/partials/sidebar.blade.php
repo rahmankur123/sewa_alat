@@ -1,209 +1,260 @@
 @php
     $role = auth()->user()->role ?? null;
+
+    $menuClass = "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200";
+    $inactiveClass = "text-blue-100 hover:bg-white/10 hover:text-white";
+    $activeClass = "bg-white text-blue-600 font-semibold shadow";
+
+    function activeMenu($paths = []) {
+        foreach ($paths as $path) {
+            if (request()->is($path)) {
+                return true;
+            }
+        }
+        return false;
+    }
 @endphp
 
-<aside class="w-64 h-screen bg-white border-r flex flex-col shadow-sm">
+<div class="h-full flex flex-col">
 
-    <!-- HEADER -->
-    <div class="px-6 py-5 border-b">
-        <h2 class="text-lg font-semibold text-gray-800">
-            Dashboard
-        </h2>
-        <p class="text-xs text-gray-500 mt-1 capitalize">
-            {{ $role }}
-        </p>
+    {{-- LOGO --}}
+    <div class="h-16 px-6 flex items-center border-b border-white/10">
+        <div>
+            <h1 class="text-xl font-bold tracking-wide">
+                BELADIRI RENT
+            </h1>
+
+            <p class="text-xs text-blue-100 mt-1 capitalize">
+                {{ $role }}
+            </p>
+        </div>
     </div>
 
-    <!-- MENU -->
-    <nav class="flex-1 overflow-y-auto px-4 py-4 text-sm space-y-1">
+    {{-- MENU --}}
+    <div class="flex-1 overflow-y-auto px-4 py-5 space-y-2 text-sm">
 
-        {{-- STYLE BASE --}}
-        @php
-            $menuClass = "flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition";
-            $activeClass = "bg-indigo-100 text-indigo-600 font-semibold";
-        @endphp
-
-
-        <!-- PEMILIK -->
+        {{-- ================= PEMILIK ================= --}}
         @if($role == 'pemilik')
 
-        <a href="/admin/dashboard" class="{{ $menuClass }}">
-            🏠 Home
-        </a>
+            <a href="/pemilik/dashboard"
+               class="{{ $menuClass }} {{ activeMenu(['pemilik/dashboard']) ? $activeClass : $inactiveClass }}">
+                🏠 Dashboard
+            </a>
 
-        <p class="text-xs text-gray-400 mt-4 mb-2 uppercase">Management</p>
+            <div class="pt-4">
+                <p class="text-xs uppercase tracking-widest text-blue-200 mb-3">
+                    Laporan
+                </p>
 
-        <a href="/laporan" class="{{ $menuClass }}">
-            📊 Laporan
-        </a>
+                <div class="space-y-1 border-l border-white/20 ml-3 pl-4">
 
-        <a href="/petugas" class="{{ $menuClass }}">
-            👨‍💼 Petugas
-        </a>
+                    <a href="/pemilik/laporan/barang-hilang"
+                       class="{{ activeMenu(['pemilik/laporan/barang-hilang']) ? 'text-white font-semibold' : 'text-blue-100 hover:text-white' }}">
+                        Barang Hilang
+                    </a>
+
+                    <a href="/pemilik/laporan/kerusakan"
+                       class="block py-1 {{ activeMenu(['pemilik/laporan/kerusakan']) ? 'text-white font-semibold' : 'text-blue-100 hover:text-white' }}">
+                        Kerusakan
+                    </a>
+
+                    <a href="/pemilik/laporan/penyewaan"
+                       class="block py-1 {{ activeMenu(['pemilik/laporan/penyewaan']) ? 'text-white font-semibold' : 'text-blue-100 hover:text-white' }}">
+                        Penyewaan
+                    </a>
+
+                </div>
+            </div>
 
         @endif
 
 
-        <!-- PETUGAS -->
+        {{-- ================= PETUGAS ================= --}}
         @if($role == 'petugas')
 
-        <a href="/petugas/dashboard" class="{{ $menuClass }}">
-            🏠 Home
-        </a>
+            <a href="/petugas/dashboard"
+               class="{{ $menuClass }} {{ activeMenu(['petugas/dashboard']) ? $activeClass : $inactiveClass }}">
+                🏠 Dashboard
+            </a>
 
-        <p class="text-xs text-gray-400 mt-4 mb-2 uppercase">Master Data</p>
+            <div class="pt-4">
+                <p class="text-xs uppercase tracking-widest text-blue-200 mb-3">
+                    Master Data
+                </p>
 
-        <a href="/petugas/barang" class="{{ $menuClass }}">
-            📦 Barang
-        </a>
+                <div class="space-y-2">
 
-        <a href="/petugas/user" class="{{ $menuClass }}">
-            👥 Anggota
-        </a>
+                    <a href="/petugas/barang"
+                       class="{{ $menuClass }} {{ activeMenu(['petugas/barang*']) ? $activeClass : $inactiveClass }}">
+                        📦 Barang
+                    </a>
 
-        <!-- TRANSAKSI -->
-        <div x-data="{open:false}">
-            <button @click="open=!open"
-                class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition">
+                    <a href="/petugas/user"
+                       class="{{ $menuClass }} {{ activeMenu(['petugas/user*']) ? $activeClass : $inactiveClass }}">
+                        👥 Anggota
+                    </a>
 
-                <span class="flex items-center gap-3">
-                    🧾 Transaksi
-                </span>
+                </div>
+            </div>
 
-                <svg :class="open ? 'rotate-180' : ''"
-                    class="w-4 h-4 transition-transform"
-                    fill="none" stroke="currentColor" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
+            {{-- TRANSAKSI --}}
+            <div class="pt-4" x-data="{ open: false }">
 
-            <div x-show="open" x-transition class="ml-6 mt-2 space-y-1 text-gray-600">
+                <button
+                    @click="open = !open"
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-blue-100 hover:bg-white/10"
+                >
+                    <span>🧾 Transaksi</span>
 
-                <a href="/petugas/transaksi/create" class="block px-3 py-2 rounded-lg hover:bg-indigo-50">
-                    💰 Kasir
-                </a>
+                    <svg
+                        :class="open ? 'rotate-180' : ''"
+                        class="w-4 h-4 transition"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                    >
+                        <path d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
 
-                <a href="/petugas/transaksi/tersewa" class="block px-3 py-2 rounded-lg hover:bg-indigo-50">
-                    📦 Tersewa
-                </a>
+                <div x-show="open" x-transition class="mt-2 ml-3 border-l border-white/20 pl-4 space-y-1">
 
-                <a href="/petugas/transaksi/dipinjam" class="block px-3 py-2 rounded-lg hover:bg-indigo-50">
-                    📤 Dipinjam
-                </a>
+                    <a href="/petugas/transaksi/create"
+                       class="block py-1 {{ activeMenu(['petugas/transaksi/create']) ? 'text-white font-semibold' : 'text-blue-100 hover:text-white' }}">
+                        Kasir
+                    </a>
 
-                <a href="/petugas/transaksi/terdenda" class="block px-3 py-2 rounded-lg hover:bg-indigo-50">
-                    ⚠️ Denda
-                </a>
+                    <a href="/petugas/transaksi/tersewa"
+                       class="block py-1 {{ activeMenu(['petugas/transaksi/tersewa']) ? 'text-white font-semibold' : 'text-blue-100 hover:text-white' }}">
+                        Tersewa
+                    </a>
 
-                <a href="/petugas/transaksi/hilang" class="block px-3 py-2 rounded-lg hover:bg-indigo-50">
-                    📦 Barang Hilang
-                </a>
+                    <a href="/petugas/transaksi/dipinjam"
+                       class="block py-1 {{ activeMenu(['petugas/transaksi/dipinjam']) ? 'text-white font-semibold' : 'text-blue-100 hover:text-white' }}">
+                        Dipinjam
+                    </a>
 
-                <a href="/petugas/transaksi/selesai" class="block px-3 py-2 rounded-lg hover:bg-indigo-50">
-                    ✅ Selesai
-                </a>
+                    <a href="/petugas/transaksi/terdenda"
+                       class="block py-1 {{ activeMenu(['petugas/transaksi/terdenda']) ? 'text-white font-semibold' : 'text-blue-100 hover:text-white' }}">
+                        Denda
+                    </a>
+
+                    <a href="/petugas/transaksi/hilang"
+                       class="block py-1 {{ activeMenu(['petugas/transaksi/hilang']) ? 'text-white font-semibold' : 'text-blue-100 hover:text-white' }}">
+                        Barang Hilang
+                    </a>
+
+                    <a href="/petugas/transaksi/selesai"
+                       class="block py-1 {{ activeMenu(['petugas/transaksi/selesai']) ? 'text-white font-semibold' : 'text-blue-100 hover:text-white' }}">
+                        Selesai
+                    </a>
+
+                </div>
+            </div>
+
+            {{-- LAPORAN --}}
+            <div class="pt-4">
+
+                <p class="text-xs uppercase tracking-widest text-blue-200 mb-3">
+                    Laporan
+                </p>
+
+                <div class="space-y-1 border-l border-white/20 ml-3 pl-4">
+
+                    <a href="/petugas/laporan/barang-hilang"
+                       class="block py-1 {{ activeMenu(['petugas/laporan/barang-hilang']) ? 'text-white font-semibold' : 'text-blue-100 hover:text-white' }}">
+                        Barang Hilang
+                    </a>
+
+                    <a href="/petugas/laporan/kerusakan"
+                       class="block py-1 {{ activeMenu(['petugas/laporan/kerusakan']) ? 'text-white font-semibold' : 'text-blue-100 hover:text-white' }}">
+                        Kerusakan
+                    </a>
+
+                    <a href="/petugas/laporan/penyewaan"
+                       class="block py-1 {{ activeMenu(['petugas/laporan/penyewaan']) ? 'text-white font-semibold' : 'text-blue-100 hover:text-white' }}">
+                        Penyewaan
+                    </a>
+
+                </div>
 
             </div>
-        </div>
-
-        <!-- LAPORAN -->
-        <div x-data="{open:false}">
-            <button @click="open=!open"
-                class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition">
-
-                <span class="flex items-center gap-3">
-                    📑 Laporan
-                </span>
-
-                <svg :class="open ? 'rotate-180' : ''"
-                    class="w-4 h-4 transition-transform"
-                    fill="none" stroke="currentColor" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
-
-            <div x-show="open" x-transition class="ml-6 mt-2 space-y-1 text-gray-600">
-
-                <a href="/petugas/laporan" class="block px-3 py-2 rounded-lg hover:bg-indigo-50">
-                    💰 Denda
-                </a>
-
-                <a href="/petugas/laporan" class="block px-3 py-2 rounded-lg hover:bg-indigo-50">
-                    📦 Kerusakan
-                </a>
-
-                <a href="/petugas/laporan" class="block px-3 py-2 rounded-lg hover:bg-indigo-50">
-                    📤 Penyewaan
-                </a>
-
-            </div>
-        </div>
 
         @endif
 
 
-        <!-- ANGGOTA -->
+        {{-- ================= ANGGOTA ================= --}}
         @if($role == 'anggota')
 
-        <a href="/anggota/dashboard" class="{{ $menuClass }}">
-            🏠 Home
-        </a>
+            <a href="/anggota/dashboard"
+               class="{{ $menuClass }} {{ activeMenu(['anggota/dashboard']) ? $activeClass : $inactiveClass }}">
+                🏠 Dashboard
+            </a>
 
-        <p class="text-xs text-gray-400 mt-4 mb-2 uppercase">Menu</p>
+            <a href="/anggota/sewa"
+               class="{{ $menuClass }} {{ activeMenu(['anggota/sewa*']) ? $activeClass : $inactiveClass }}">
+                🛒 Katalog
+            </a>
 
-        <a href="/anggota/sewa" class="{{ $menuClass }}">
-            🛒 Katalog
-        </a>
+            {{-- TRANSAKSI --}}
+            <div class="pt-4" x-data="{ open: true }">
 
-        <div x-data="{open:false}">
-            <button @click="open=!open"
-                class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition">
+                <button
+                    @click="open = !open"
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-blue-100 hover:bg-white/10"
+                >
+                    <span>🧾 Transaksi</span>
 
-                <span class="flex items-center gap-3">
-                    🧾 Transaksi
-                </span>
+                    <svg
+                        :class="open ? 'rotate-180' : ''"
+                        class="w-4 h-4 transition"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                    >
+                        <path d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
 
-                <svg :class="open ? 'rotate-180' : ''"
-                    class="w-4 h-4 transition-transform"
-                    fill="none" stroke="currentColor" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
+                <div x-show="open" x-transition class="mt-2 ml-3 border-l border-white/20 pl-4 space-y-1">
 
-            <div x-show="open" x-transition class="ml-6 mt-2 space-y-1 text-gray-600">
+                    <a href="/anggota/riwayat/tersewa"
+                       class="block py-1 {{ activeMenu(['anggota/riwayat/tersewa']) ? 'text-white font-semibold' : 'text-blue-100 hover:text-white' }}">
+                        Tersewa
+                    </a>
 
-                <a href="/anggota/riwayat/tersewa" class="block px-3 py-2 rounded-lg hover:bg-indigo-50">
-                    📦 Tersewa
-                </a>
+                    <a href="/anggota/riwayat/dipinjam"
+                       class="block py-1 {{ activeMenu(['anggota/riwayat/dipinjam']) ? 'text-white font-semibold' : 'text-blue-100 hover:text-white' }}">
+                        Dipinjam
+                    </a>
 
-                <a href="/anggota/riwayat/dipinjam" class="block px-3 py-2 rounded-lg hover:bg-indigo-50">
-                    📤 Dipinjam
-                </a>
+                    <a href="/anggota/riwayat/terdenda"
+                       class="block py-1 {{ activeMenu(['anggota/riwayat/terdenda']) ? 'text-white font-semibold' : 'text-blue-100 hover:text-white' }}">
+                        Denda
+                    </a>
 
-                <a href="/anggota/riwayat/terdenda" class="block px-3 py-2 rounded-lg hover:bg-indigo-50">
-                    ⚠️ Denda
-                </a>
+                    <a href="/anggota/riwayat/hilang"
+                       class="block py-1 {{ activeMenu(['anggota/riwayat/hilang']) ? 'text-white font-semibold' : 'text-blue-100 hover:text-white' }}">
+                        Barang Hilang
+                    </a>
 
-                <a href="/anggota/riwayat/hilang" class="block px-3 py-2 rounded-lg hover:bg-indigo-50">
-                    📦 Barang Hilang
-                </a>
+                    <a href="/anggota/riwayat/selesai"
+                       class="block py-1 {{ activeMenu(['anggota/riwayat/selesai']) ? 'text-white font-semibold' : 'text-blue-100 hover:text-white' }}">
+                        Selesai
+                    </a>
 
-                <a href="/anggota/riwayat/selesai" class="block px-3 py-2 rounded-lg hover:bg-indigo-50">
-                    ✅ Selesai
-                </a>
-
+                </div>
             </div>
-        </div>
 
-        <a href="/anggota/profile" class="{{ $menuClass }}">
-            👤 Profile
-        </a>
+            <a href="/anggota/profil"
+               class="{{ $menuClass }} {{ activeMenu(['anggota/profil']) ? $activeClass : $inactiveClass }}">
+                👤 Profil
+            </a>
 
         @endif
 
-    </nav>
+    </div>
 
-</aside>
+</div>

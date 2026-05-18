@@ -33,7 +33,7 @@
     {{-- CARD --}}
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
 
-        <form action="{{ route('profil.update') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('anggota.profil.update') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 

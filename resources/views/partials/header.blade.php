@@ -1,48 +1,70 @@
-<header class="bg-white border-b px-4 md:px-6 w-full py-3 flex justify-between items-center">
+<header class="h-full bg-white px-4 md:px-6 flex items-center justify-between">
 
     {{-- LEFT --}}
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-4">
 
-        <!-- tombol mobile -->
-        <button @click="open = true" class="md:hidden text-gray-700 text-xl">
+        {{-- MOBILE BUTTON --}}
+        <button
+            @click="open = true"
+            class="md:hidden w-10 h-10 rounded-lg hover:bg-slate-100 text-gray-700"
+        >
             ☰
         </button>
 
-        <img 
-            src="{{ asset('/storage/logo.jpg') }}" 
-            class="w-9 h-9 object-contain"
-        >
+        {{-- LOGO --}}
+        <div class="flex items-center gap-3">
 
-        <h1 class="font-semibold text-gray-800 text-lg hidden sm:block">
-            Sistem Persewaan
-        </h1>
+            <img
+                src="{{ asset('/storage/logo.jpg') }}"
+                class="w-10 h-10 rounded-xl object-cover border"
+            >
+
+            <div class="hidden sm:block">
+                <h1 class="font-bold text-gray-800 leading-tight">
+                    Sistem Persewaan
+                </h1>
+
+                <p class="text-xs text-gray-500">
+                    Alat Bela Diri
+                </p>
+            </div>
+
+        </div>
+
     </div>
 
     {{-- RIGHT --}}
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-4">
 
         {{-- USER --}}
-        <div class="text-right hidden sm:block">
-            <p class="text-sm font-semibold text-gray-800">
+        <div class="hidden sm:block text-right">
+
+            <h3 class="text-sm font-semibold text-gray-800">
                 {{ auth()->user()->name }}
-            </p>
+            </h3>
+
             <p class="text-xs text-gray-500 capitalize">
                 {{ auth()->user()->role }}
             </p>
+
         </div>
 
         {{-- FOTO --}}
-        <img 
+        <img
             src="{{ asset('/storage/user/' . auth()->user()->foto) }}"
-            class="w-9 h-9 object-cover rounded-full border"
+            class="w-10 h-10 rounded-full object-cover border-2 border-blue-500"
         >
 
         {{-- LOGOUT --}}
         <form action="{{ route('logout') }}" method="POST">
             @csrf
-            <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 text-sm rounded-lg transition">
+
+            <button
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition"
+            >
                 Logout
             </button>
+
         </form>
 
     </div>

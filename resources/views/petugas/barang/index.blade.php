@@ -32,17 +32,6 @@
         </div>
 
         <div class="flex flex-col">
-            <label class="text-xs text-gray-500 mb-1">Status</label>
-            <select name="status"
-                class="bg-gray-50 px-3 py-2 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-indigo-400 outline-none">
-                <option value="">Semua</option>
-                <option value="tersedia" {{ request('status')=='tersedia'?'selected':'' }}>Tersedia</option>
-                <option value="rusak" {{ request('status')=='rusak'?'selected':'' }}>Rusak</option>
-                <option value="tidak_tersedia" {{ request('status')=='tidak_tersedia'?'selected':'' }}>Tidak Tersedia</option>
-            </select>
-        </div>
-
-        <div class="flex flex-col">
             <label class="text-xs text-gray-500 mb-1">Harga</label>
             <div class="flex gap-2">
                 <input type="number" name="min_harga" placeholder="Min"
@@ -58,6 +47,11 @@
         <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 transition h-fit">
             Filter
         </button>
+
+        <a href="{{ url()->current() }}" 
+           class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-600 transition h-fit">
+            Reset
+        </a>
 
     </form>
 

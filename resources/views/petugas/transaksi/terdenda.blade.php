@@ -46,6 +46,7 @@
                     <th class="px-4 py-3 text-left">Nama User</th>
                     <th class="px-4 py-3 text-right">Kerusakan</th>
                     <th class="px-4 py-3 text-right">Keterlambatan</th>
+                    <th class="px-4 py-3 text-right">Barang Hilang</th>
                     <th class="px-4 py-3 text-right">Total Denda</th>
                     <th class="px-4 py-3 text-center w-40">Aksi</th>
                 </tr>
@@ -55,9 +56,17 @@
                 @forelse($data as $d)
 
                 @php
-                    $dendaKerusakan = $d->kerusakan->sum('total_denda');
-                    $dendaTerlambat = $d->keterlambatan->sum('total_denda');
-                    $totalDenda = $dendaKerusakan + $dendaTerlambat;
+                    // Denda kerusakan
+                    $dendaKerusakan = $d->kerusakan?->sum('total_denda') ?? 0;
+
+                    // Denda keterlambatan
+                    $dendaTerlambat = $d->keterlambatan?->sum('total_denda') ?? 0;
+
+                    // Denda barang hilang
+                    $dendaHilang = $d->hilang?->sum('denda') ?? 0;
+
+                    // Total seluruh denda
+                    $totalDenda = $dendaKerusakan + $dendaTerlambat + $dendaHilang;
                 @endphp
 
                 <tr class="border-t hover:bg-slate-50 transition duration-200">
@@ -69,7 +78,7 @@
 
                     {{-- NAMA --}}
                     <td class="px-4 py-3 font-medium text-slate-700">
-                        {{ $d->user->name }}
+                        {{ $d->user->name ?? '-' }}
                     </td>
 
                     {{-- KERUSAKAN --}}
@@ -94,16 +103,31 @@
                         @endif
                     </td>
 
+                    {{-- BARANG HILANG --}}
+                    <td class="px-4 py-3 text-right">
+                        @if($dendaHilang > 0)
+                            <span class="text-red-600 font-medium">
+                                Rp {{ number_format($dendaHilang,0,',','.') }}
+                            </span>
+                        @else
+                            <span class="text-slate-400">-</span>
+                        @endif
+                    </td>
+
                     {{-- TOTAL --}}
                     <td class="px-4 py-3 text-right font-semibold text-slate-700">
-                        Rp {{ number_format($totalDenda,0,',','.') }}
+                        <span class="{{ $totalDenda > 0 ? 'text-red-600' : 'text-slate-400' }}">
+                            Rp {{ number_format($totalDenda,0,',','.') }}
+                        </span>
                     </td>
 
                     {{-- AKSI --}}
                     <td class="px-4 py-3 text-center space-x-1">
 
                         {{-- LUNAS --}}
-                        <form action="{{ route('petugas.transaksi.lunas',$d->id) }}" method="POST" class="inline"
+                        <form action="{{ route('petugas.transaksi.lunas',$d->id) }}"
+                              method="POST"
+                              class="inline"
                               onsubmit="return confirm('Yakin transaksi ini sudah lunas?')">
                             @csrf
                             <button type="submit"
@@ -124,7 +148,7 @@
 
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center py-10 text-slate-400">
+                    <td colspan="7" class="text-center py-10 text-slate-400">
                         Data tidak ada
                     </td>
                 </tr>

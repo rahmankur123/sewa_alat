@@ -25,6 +25,7 @@
                         <th class="px-6 py-3 text-left w-40">Tanggal Kembali</th>
                         <th class="px-6 py-3 text-right w-40">Denda Keterlambatan</th>
                         <th class="px-6 py-3 text-right w-40">Denda Kerusakan</th>
+                        <th class="px-6 py-3 text-right w-40">Denda Barang Hilang</th>
                         <th class="px-6 py-3 text-right w-40">Total Denda</th>
                         <th class="px-6 py-3 text-center w-40">Aksi</th>
                     </tr>
@@ -35,9 +36,17 @@
                 @forelse($data as $d)
 
                 @php
-                    $denda_keterlambatan = $d->keterlambatan->sum('total_denda');
-                    $denda_kerusakan = $d->kerusakan->sum('total_denda');
-                    $total_denda = $denda_keterlambatan + $denda_kerusakan;
+                    // Denda keterlambatan
+                    $denda_keterlambatan = $d->keterlambatan?->sum('total_denda') ?? 0;
+
+                    // Denda kerusakan
+                    $denda_kerusakan = $d->kerusakan?->sum('total_denda') ?? 0;
+
+                    // Denda barang hilang
+                    $denda_hilang = $d->hilang?->sum('denda') ?? 0;
+
+                    // Total seluruh denda
+                    $total_denda = $denda_keterlambatan + $denda_kerusakan + $denda_hilang;
                 @endphp
 
                 <tr class="border-t hover:bg-red-50 transition">
@@ -49,7 +58,7 @@
 
                     {{-- NAMA --}}
                     <td class="px-6 py-4">
-                        {{ $d->user->name }}
+                        {{ $d->user->name ?? '-' }}
                     </td>
 
                     {{-- TANGGAL SEWA --}}
@@ -59,7 +68,7 @@
 
                     {{-- TANGGAL KEMBALI --}}
                     <td class="px-6 py-4">
-                        {{ $d->tanggal_kembali_real 
+                        {{ $d->tanggal_kembali_real
                             ? \Carbon\Carbon::parse($d->tanggal_kembali_real)->translatedFormat('d F Y')
                             : '-' }}
                     </td>
@@ -67,21 +76,28 @@
                     {{-- DENDA KETERLAMBATAN --}}
                     <td class="px-6 py-4 text-right">
                         <span class="{{ $denda_keterlambatan > 0 ? 'text-red-500 font-semibold' : 'text-slate-400' }}">
-                            Rp {{ number_format($denda_keterlambatan,0,',','.') }}
+                            Rp {{ number_format($denda_keterlambatan, 0, ',', '.') }}
                         </span>
                     </td>
 
                     {{-- DENDA KERUSAKAN --}}
                     <td class="px-6 py-4 text-right">
                         <span class="{{ $denda_kerusakan > 0 ? 'text-red-500 font-semibold' : 'text-slate-400' }}">
-                            Rp {{ number_format($denda_kerusakan,0,',','.') }}
+                            Rp {{ number_format($denda_kerusakan, 0, ',', '.') }}
+                        </span>
+                    </td>
+
+                    {{-- DENDA BARANG HILANG --}}
+                    <td class="px-6 py-4 text-right">
+                        <span class="{{ $denda_hilang > 0 ? 'text-red-500 font-semibold' : 'text-slate-400' }}">
+                            Rp {{ number_format($denda_hilang, 0, ',', '.') }}
                         </span>
                     </td>
 
                     {{-- TOTAL DENDA --}}
                     <td class="px-6 py-4 text-right font-semibold">
                         <span class="text-red-600">
-                            Rp {{ number_format($total_denda,0,',','.') }}
+                            Rp {{ number_format($total_denda, 0, ',', '.') }}
                         </span>
                     </td>
 
@@ -97,7 +113,7 @@
 
                 @empty
                 <tr>
-                    <td colspan="8" class="text-center py-10 text-slate-400">
+                    <td colspan="9" class="text-center py-10 text-slate-400">
                         Tidak ada transaksi terdenda
                     </td>
                 </tr>

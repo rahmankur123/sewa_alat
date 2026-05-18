@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use App\Models\Barang;
 use App\Models\Transaksi;
@@ -15,15 +13,16 @@ class DashboardController extends Controller
         $total_barang = Barang::count();
         $total_transaksi = Transaksi::count();
 
-        $dipinjam = Transaksi::where('status_transaksi','dipinjam')->count();
-        $terdenda = Transaksi::where('status_transaksi','terdenda')->count();
+        $dipinjam = Transaksi::where('status_transaksi', 'dipinjam')->count();
+        $terdenda = Transaksi::where('status_transaksi', 'terdenda')->count();
 
-        $total_denda = Transaksi::sum('total_denda');
+        // Jika kolom total_denda belum ada, gunakan 0 agar tidak error
+        $total_denda = Transaksi::sum('total_denda') ?? 0;
 
         $latest = Transaksi::with('user')
-                    ->latest()
-                    ->limit(5)
-                    ->get();
+            ->latest()
+            ->limit(5)
+            ->get();
 
         return view('dashboard.admin', compact(
             'total_barang',
@@ -34,27 +33,33 @@ class DashboardController extends Controller
             'latest'
         ));
     }
- 
+
     // ================= ANGGOTA =================
     public function anggota()
     {
         $user = Auth::user();
 
-        $total_sewa = Transaksi::where('user_id',$user->id)->count();
+        // Total seluruh transaksi sewa user
+        $total = Transaksi::where('user_id', $user->id)->count();
 
-        $dipinjam = Transaksi::where('user_id',$user->id)
-                    ->where('status_transaksi','dipinjam')->count();
+        // Sedang dipinjam
+        $dipinjam = Transaksi::where('user_id', $user->id)
+            ->where('status_transaksi', 'dipinjam')
+            ->count();
 
-        $terdenda = Transaksi::where('user_id',$user->id)
-                    ->where('status_transaksi','terdenda')->count();
+        // Transaksi yang memiliki denda
+        $terdenda = Transaksi::where('user_id', $user->id)
+            ->where('status_transaksi', 'terdenda')
+            ->count();
 
-        $latest = Transaksi::where('user_id',$user->id)
-                    ->latest()
-                    ->limit(5)
-                    ->get();
+        // Riwayat terbaru
+        $latest = Transaksi::where('user_id', $user->id)
+            ->latest()
+            ->limit(5)
+            ->get();
 
         return view('dashboard.anggota', compact(
-            'total_sewa',
+            'total',
             'dipinjam',
             'terdenda',
             'latest'

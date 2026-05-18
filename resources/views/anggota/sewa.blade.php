@@ -67,7 +67,7 @@
                 Keranjang Sewa
             </h2>
 
-            <form action="{{ route('sewa.store') }}" method="POST">
+            <form action="{{ route('anggota.sewa.store') }}" method="POST">
                 @csrf
 
                 <input type="hidden" name="user_id" value="{{ auth()->id() }}">

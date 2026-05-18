@@ -17,7 +17,7 @@
         <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
             <p class="text-sm text-slate-500">Total Sewa</p>
             <h2 class="text-2xl font-bold text-slate-700 mt-1">
-                {{ $total_sewa }}
+                {{ $total }}
             </h2>
         </div>
 

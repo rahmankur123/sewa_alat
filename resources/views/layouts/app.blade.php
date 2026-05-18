@@ -8,58 +8,70 @@
     @vite('resources/css/app.css')
 
     <style>
-    @media print {
-        body {
-            background: white !important;
-        }
-
-        aside, header, footer {
+        [x-cloak] {
             display: none !important;
         }
 
-        .no-print {
-            display: none !important;
-        }
+        @media print {
+            body {
+                background: white !important;
+            }
 
-        main {
-            padding: 0 !important;
+            aside,
+            header,
+            footer,
+            .no-print {
+                display: none !important;
+            }
+
+            main {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
         }
-    }
     </style>
 </head>
 
-<body class="bg-gray-100">
+<body class="bg-slate-100 overflow-hidden">
 
-<div x-data="{ open: false }" class="flex min-h-screen">
+<div x-data="{ open: false }" class="h-screen flex overflow-hidden">
 
-    {{-- Sidebar --}}
-    <aside 
+    {{-- SIDEBAR --}}
+    <aside
         :class="open ? 'translate-x-0' : '-translate-x-full'"
-        class="fixed md:static z-40 w-64 bg-white shadow-md transform md:translate-x-0 transition-transform duration-300"
+        class="fixed md:static inset-y-0 left-0 z-50
+               w-72 bg-blue-600 text-white
+               transition-all duration-300 transform
+               md:translate-x-0 flex flex-col shadow-2xl"
     >
         @include('partials.sidebar')
     </aside>
 
-    {{-- Overlay mobile --}}
-    <div 
+    {{-- OVERLAY MOBILE --}}
+    <div
         x-show="open"
+        x-cloak
         @click="open = false"
-        class="fixed inset-0 bg-black opacity-40 md:hidden"
+        class="fixed inset-0 bg-black/50 z-40 md:hidden"
     ></div>
 
-    <div class="flex-1 flex flex-col">
+    {{-- CONTENT --}}
+    <div class="flex-1 flex flex-col overflow-hidden">
 
+        {{-- HEADER --}}
+        <header class="h-16 shrink-0 bg-white border-b shadow-sm z-30">
             @include('partials.header')
+        </header>
 
-        {{-- CONTENT --}}
+        {{-- MAIN --}}
         <main class="flex-1 overflow-y-auto p-4 md:p-6">
             <div class="max-w-7xl mx-auto">
                 @yield('content')
             </div>
         </main>
 
-        {{-- Footer --}}
-        <footer class="bg-white text-center p-3 text-sm text-gray-500">
+        {{-- FOOTER --}}
+        <footer class="h-12 shrink-0 bg-white border-t">
             @include('partials.footer')
         </footer>
 
@@ -67,6 +79,7 @@
 
 </div>
 
-<script src="//unpkg.com/alpinejs" defer></script>
+<script defer src="https://unpkg.com/alpinejs"></script>
+
 </body>
 </html>
