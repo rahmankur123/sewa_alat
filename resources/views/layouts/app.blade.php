@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{-- TOM SELECT --}}
+<link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
     <title>@yield('title') | Sewa Alat Bela Diri</title>
 
     @vite('resources/css/app.css')
@@ -59,7 +61,7 @@
     <div class="flex-1 flex flex-col overflow-hidden">
 
         {{-- HEADER --}}
-        <header class="h-16 shrink-0 bg-white border-b shadow-sm z-30">
+        <header class="h-16 shrink-0 bg-white shadow-sm z-30">
             @include('partials.header')
         </header>
 
@@ -70,16 +72,13 @@
             </div>
         </main>
 
-        {{-- FOOTER --}}
-        <footer class="h-12 shrink-0 bg-white border-t">
-            @include('partials.footer')
-        </footer>
-
     </div>
 
 </div>
 
 <script defer src="https://unpkg.com/alpinejs"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
 </body>
 </html>

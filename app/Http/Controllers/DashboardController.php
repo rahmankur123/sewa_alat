@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Barang;
 use App\Models\Transaksi;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -19,6 +20,21 @@ class DashboardController extends Controller
         // Jika kolom total_denda belum ada, gunakan 0 agar tidak error
         $total_denda = Transaksi::sum('total_denda') ?? 0;
 
+        $total_anggota = User::where('role','anggota')->count();
+
+        $pendapatan_bulan_ini = Transaksi::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('total_harga');
+
+        $transaksi_hari_ini = Transaksi::whereDate('created_at', today())->count();
+
+        $total_pendapatan = Transaksi::sum('total_harga');
+
+        $sedang_berjalan = Transaksi::whereIn('status_transaksi', [
+            'dipinjam',
+            'tersewa'
+        ])->count();
+
         $latest = Transaksi::with('user')
             ->latest()
             ->limit(5)
@@ -30,6 +46,11 @@ class DashboardController extends Controller
             'dipinjam',
             'terdenda',
             'total_denda',
+            'total_anggota',
+            'pendapatan_bulan_ini',
+            'transaksi_hari_ini',
+            'total_pendapatan',
+            'sedang_berjalan',
             'latest'
         ));
     }

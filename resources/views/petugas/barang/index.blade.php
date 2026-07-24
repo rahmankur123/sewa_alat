@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl mx-auto p-4 md:p-6">
+<div class="max-w-7xl mx-auto p-2 md:p-6">
 
     <!-- HEADER -->
     <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-6">
@@ -44,12 +44,12 @@
             </div>
         </div>
 
-        <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 transition h-fit">
+        <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg cursor-pointer text-sm hover:bg-indigo-700 transition h-fit">
             Filter
         </button>
 
         <a href="{{ url()->current() }}" 
-           class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-600 transition h-fit">
+           class="bg-red-500 text-white px-4 py-2 rounded-lg cursor-pointer text-sm hover:bg-gray-600 transition h-fit">
             Reset
         </a>
 
@@ -102,7 +102,7 @@
                 <div class="flex gap-2 mt-3">
 
                     <a href="{{ route('barang.edit',$b->id) }}"
-                       class="flex-1 text-center bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg text-xs hover:bg-indigo-100">
+                       class="flex-1 text-center bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg text-xs hover:bg-indigo-100 cursor-pointer">
                         Edit
                     </a>
 
@@ -110,7 +110,7 @@
                         @csrf
                         @method('DELETE')
                         <button onclick="return confirm('Hapus barang?')"
-                            class="w-full bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-red-600">
+                            class="w-full bg-red-500 text-white px-3 py-1.5 rounded-lg cursor-pointer text-xs hover:bg-red-600">
                             Hapus
                         </button>
                     </form>

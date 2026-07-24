@@ -47,7 +47,7 @@ public function store(Request $request)
 
         $transaksi->update(['total_harga'=>$total]);
 
-    return redirect()->route('riwayat.tersewa')
+    return redirect()->route('anggota.riwayat.tersewa')
         ->with('success','Sewa berhasil');
 }
 

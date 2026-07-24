@@ -39,7 +39,7 @@ public function proses(Request $request)
         }
 
         if($role == 'anggota'){
-            return redirect()->route('anggota.dashboard  ');
+            return redirect()->route('anggota.dashboard');
         }
 
     }

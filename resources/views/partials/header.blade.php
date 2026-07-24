@@ -50,17 +50,15 @@
         </div>
 
         {{-- FOTO --}}
-        <img
-            src="{{ asset('/storage/user/' . auth()->user()->foto) }}"
-            class="w-10 h-10 rounded-full object-cover border-2 border-blue-500"
-        >
+        <img src="{{ asset('storage/' . auth()->user()->foto) }}"
+             class="w-10 h-10 rounded-full object-cover border">
 
         {{-- LOGOUT --}}
         <form action="{{ route('logout') }}" method="POST">
             @csrf
 
             <button
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition"
+                class="bg-blue-600 cursor-pointer hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition"
             >
                 Logout
             </button>

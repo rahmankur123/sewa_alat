@@ -9,6 +9,7 @@ use App\Http\Controllers\User\UserController as UserUserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\Pemilik\PetugasController;
 
 
 
@@ -27,6 +28,17 @@ Route::post('/aktivasi/{token}', [App\Http\Controllers\Auth\AktivasiController::
 Route::middleware(['auth','role:pemilik'])->prefix('pemilik')->group(function(){
 
 Route::get('/dashboard',[DashboardController::class,'admin'])->name('dashboard.pemilik');
+
+//Kelola Petugas
+Route::resource('user', PetugasController::class)->names([
+    'index' => 'pemilik.user.index', 
+    'create' => 'pemilik.user.create',
+    'store' => 'pemilik.user.store',
+    'edit' => 'pemilik.user.edit',
+    'update' => 'pemilik.user.update',
+    'destroy' => 'pemilik.user.destroy'
+]);
+
 // Barang Hilang
 Route::get('/laporan/barang-hilang', [LaporanController::class, 'barangHilang'])
     ->name('pemilik.laporan.barangHilang');
@@ -79,6 +91,8 @@ Route::middleware(['auth','role:petugas'])->prefix('petugas')->group(function(){
 
     Route::post('/transaksi/tersewa/{id}', [TransaksiController::class,'diambil'])->name('petugas.transaksi.diambil');
 
+    Route::get('/transaksi/tersewa/{id}', [TransaksiController::class,'prosesAmbil'])->name('petugas.transaksi.prosesAmbil');
+
     Route::get('/transaksi/selesai/{id}/nota',[TransaksiController::class,'notaSelesai'])->name('petugas.transaksi.notaSelesai');
 
     Route::get('/transaksi/selesai/{id}/detail',[TransaksiController::class,'detailSelesai'])->name('petugas.transaksi.detailSelesai');
@@ -98,12 +112,12 @@ Route::middleware(['auth','role:petugas'])->prefix('petugas')->group(function(){
         'destroy' => 'barang.destroy',
     ]);
     Route::resource('user', UserController::class)->names([
-    'index' => 'user.index',
-    'create' => 'user.create',
-    'store' => 'user.store',
-    'edit' => 'user.edit',
-    'update' => 'user.update',
-    'destroy' => 'user.destroy',
+    'index' => 'petugas.user.index',
+    'create' => 'petugas.user.create',
+    'store' => 'petugas.user.store',
+    'edit' => 'petugas.user.edit',
+    'update' => 'petugas.user.update',
+    'destroy' => 'petugas.user.destroy',
     ]);
 
 // Barang Hilang

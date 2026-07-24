@@ -18,7 +18,7 @@
         </div>
 
         <a href="{{ route('barang.index') }}"
-           class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm w-fit">
+           class="px-4 py-2 bg-blue-500 text-gray-700 rounded-lg hover:bg-blue-600 text-sm w-fit cursor-pointer text-white">
             ← Kembali
         </a>
     </div>
@@ -115,7 +115,7 @@
             </a>
 
             <button type="submit"
-                class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-sm">
+                class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-sm cursor-pointer hover:shadow-md">
                 Simpan
             </button>
 

@@ -16,7 +16,7 @@
         </div>
 
         <a href="{{ url()->previous() }}"
-           class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm w-fit">
+           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer text-sm w-fit">
             ← Kembali
         </a>
     </div>

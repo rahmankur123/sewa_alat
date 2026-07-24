@@ -27,7 +27,6 @@ class LaporanController extends Controller
             ->whereHas('hilang');
 
         $this->filterTanggal($data, $request, 'tanggal_pinjam');
-
         $data = $data->latest()->paginate(10)->withQueryString();
 
         return view('laporan.barang_hilang', compact('data'));
@@ -47,17 +46,33 @@ class LaporanController extends Controller
 
     public function penyewaan(Request $request)
     {
-        $data = Transaksi::with([
+        $query = Transaksi::with([
             'user',
             'detail.barang',
             'keterlambatan',
-            'kerusakan.barang',
-            'hilang.barang'
+            'kerusakan',
+            'hilang'
         ]);
 
-        $this->filterTanggal($data, $request, 'tanggal_pinjam');
+        // FILTER TANGGAL
+        if ($request->tanggal_awal && $request->tanggal_akhir) {
 
-        $data = $data->latest()->paginate(10)->withQueryString();
+            $query->whereBetween('created_at', [
+                $request->tanggal_awal,
+                $request->tanggal_akhir
+            ]);
+        }
+
+        // FILTER STATUS
+        if ($request->status) {
+
+            $query->where('status_transaksi', $request->status);
+        }
+
+        $data = $query
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
         return view('laporan.penyewaan', compact('data'));
     }
@@ -99,9 +114,15 @@ class LaporanController extends Controller
 
     private function penyewaanData(Request $request)
     {
+        if ($request->status) {
+            $q = Transaksi::with([
+                'user','detail.barang','keterlambatan','kerusakan.barang','hilang.barang'
+            ])->where('status_transaksi', $request->status);
+        } else {
         $q = Transaksi::with([
             'user','detail.barang','keterlambatan','kerusakan.barang','hilang.barang'
         ]);
+        }
         $this->filterTanggal($q, $request, 'tanggal_pinjam');
         return $q->latest()->get();
     }

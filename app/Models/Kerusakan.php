@@ -12,6 +12,7 @@ class Kerusakan extends Model
         'transaksi_id',
         'barang_id',
         'qty',
+        'jenis_kerusakan',
         'total_denda'
     ];
 

@@ -10,7 +10,7 @@ class User extends Authenticatable
     protected $table = 'users';
 
     protected $fillable = [
-        'name','email','password','no_hp', 'alamat','foto','role','status','token_aktivasi'
+        'name','email','password','no_hp', 'alamat','foto','role','token_aktivasi'
     ];
 
     public function transaksi()

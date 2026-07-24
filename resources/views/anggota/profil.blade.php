@@ -3,107 +3,212 @@
 
 @section('content')
 
-<div class="max-w-3xl mx-auto">
+<div class="max-w-5xl mx-auto">
 
     {{-- HEADER --}}
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-semibold text-slate-700">
+    <div class="mb-8">
+
+        <h2 class="text-3xl font-bold tracking-tight text-slate-800">
             Edit Profil
         </h2>
+
+        <p class="text-sm text-slate-500 mt-1">
+            Kelola informasi akun dan data profil Anda
+        </p>
+
     </div>
 
-    {{-- NOTIF SUCCESS --}}
+    {{-- SUCCESS --}}
     @if(session('success'))
-    <div class="mb-4 p-4 rounded-lg bg-green-100 text-green-700 border border-green-300">
-        {{ session('success') }}
+    <div class="mb-6 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 shadow-sm">
+
+        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
+            ✅
+        </div>
+
+        <div class="text-sm font-medium text-emerald-700">
+            {{ session('success') }}
+        </div>
+
     </div>
     @endif
 
     {{-- ERROR --}}
     @if ($errors->any())
-    <div class="mb-4 p-4 rounded-lg bg-red-100 text-red-700 border border-red-300">
-        <ul class="list-disc pl-5 text-sm">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
+    <div class="mb-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 shadow-sm">
+
+        <div class="flex items-start gap-3">
+
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
+                ⚠️
+            </div>
+
+            <div>
+
+                <h4 class="text-sm font-semibold text-red-700 mb-2">
+                    Terjadi kesalahan:
+                </h4>
+
+                <ul class="list-disc pl-5 space-y-1 text-sm text-red-600">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+
+            </div>
+
+        </div>
+
     </div>
     @endif
 
     {{-- CARD --}}
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+    <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
 
-        <form action="{{ route('anggota.profil.update') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('anggota.profil.update') }}"
+              method="POST"
+              enctype="multipart/form-data">
+
             @csrf
             @method('PUT')
 
-            <div class="grid grid-cols-2 gap-4 text-sm">
+            <div class="p-8">
 
                 {{-- FOTO --}}
-                <div class="col-span-2 text-center">
-                    <img id="preview"
-                        src="{{ $user->foto ? asset('storage/'.$user->foto) : asset('img/default.png') }}"
-                        class="w-32 h-32 object-cover rounded-full mx-auto mb-3 border">
+                <div class="flex flex-col items-center mb-10">
 
-                    <input type="file" name="foto"
-                        class="text-sm"
-                        onchange="previewImage(event)">
+                    <div class="relative">
+
+                        <img id="preview"
+                            src="{{ $user->foto ? asset('storage/'.$user->foto) : asset('img/default.png') }}"
+                            class="w-36 h-36 object-cover rounded-full border-4 border-white shadow-lg">
+
+                    </div>
+
+                    <div class="mt-5">
+
+                        <label class="cursor-pointer">
+
+                            <span class="inline-flex items-center gap-2 rounded-2xl bg-slate-100 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-slate-200 transition">
+                                📷 Upload Foto
+                            </span>
+
+                            <input type="file"
+                                   name="foto"
+                                   class="hidden"
+                                   onchange="previewImage(event)">
+
+                        </label>
+
+                    </div>
+
                 </div>
 
-                {{-- NAMA --}}
-                <div>
-                    <label class="text-slate-600">Nama</label>
-                    <input type="text" name="name"
-                        value="{{ old('name',$user->name) }}"
-                        class="w-full px-3 py-2 border rounded-lg">
-                </div>
+                {{-- FORM --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                {{-- EMAIL --}}
-                <div>
-                    <label class="text-slate-600">Email</label>
-                    <input type="email" name="email"
-                        value="{{ old('email',$user->email) }}"
-                        class="w-full px-3 py-2 border rounded-lg">
-                </div>
+                    {{-- NAMA --}}
+                    <div>
 
-                {{-- NO HP --}}
-                <div>
-                    <label class="text-slate-600">No HP</label>
-                    <input type="text" name="no_hp"
-                        value="{{ old('no_hp',$user->no_hp) }}"
-                        class="w-full px-3 py-2 border rounded-lg">
-                </div>
+                        <label class="mb-2 block text-sm font-medium text-slate-600">
+                            Nama
+                        </label>
 
-                {{-- ALAMAT --}}
-                <div class="col-span-2">
-                    <label class="text-slate-600">Alamat</label>
-                    <textarea name="alamat" rows="3"
-                        class="w-full px-3 py-2 border rounded-lg">{{ old('alamat',$user->alamat) }}</textarea>
-                </div>
+                        <input type="text"
+                            name="name"
+                            value="{{ old('name',$user->name) }}"
+                            class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition">
 
-                {{-- PASSWORD --}}
-                <div>
-                    <label class="text-slate-600">Password Baru</label>
-                    <input type="password" name="password"
-                        class="w-full px-3 py-2 border rounded-lg">
-                </div>
+                    </div>
 
-                <div>
-                    <label class="text-slate-600">Konfirmasi Password</label>
-                    <input type="password" name="password_confirmation"
-                        class="w-full px-3 py-2 border rounded-lg">
+                    {{-- EMAIL --}}
+                    <div>
+
+                        <label class="mb-2 block text-sm font-medium text-slate-600">
+                            Email
+                        </label>
+
+                        <input type="email"
+                            name="email"
+                            value="{{ old('email',$user->email) }}"
+                            class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition">
+
+                    </div>
+
+                    {{-- NO HP --}}
+                    <div>
+
+                        <label class="mb-2 block text-sm font-medium text-slate-600">
+                            No HP
+                        </label>
+
+                        <input type="text"
+                            name="no_hp"
+                            value="{{ old('no_hp',$user->no_hp) }}"
+                            class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition">
+
+                    </div>
+
+                    {{-- PASSWORD --}}
+                    <div>
+
+                        <label class="mb-2 block text-sm font-medium text-slate-600">
+                            Password Baru
+                        </label>
+
+                        <input type="password"
+                            name="password"
+                            placeholder="Kosongkan jika tidak diganti"
+                            class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition">
+
+                    </div>
+
+                    {{-- ALAMAT --}}
+                    <div class="md:col-span-2">
+
+                        <label class="mb-2 block text-sm font-medium text-slate-600">
+                            Alamat
+                        </label>
+
+                        <textarea
+                            name="alamat"
+                            rows="4"
+                            class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition">{{ old('alamat',$user->alamat) }}</textarea>
+
+                    </div>
+
+                    {{-- KONFIRMASI PASSWORD --}}
+                    <div class="md:col-span-2">
+
+                        <label class="mb-2 block text-sm font-medium text-slate-600">
+                            Konfirmasi Password
+                        </label>
+
+                        <input type="password"
+                            name="password_confirmation"
+                            placeholder="Ulangi password baru"
+                            class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition">
+
+                    </div>
+
                 </div>
 
             </div>
 
             {{-- BUTTON --}}
-            <div class="flex justify-end gap-2 mt-6">
+            <div class="border-t border-slate-100 bg-slate-50 px-8 py-5">
 
-                <button type="submit"
-                    onclick="this.disabled=true; this.innerText='Menyimpan...'; this.form.submit();"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    Simpan Perubahan
-                </button>
+                <div class="flex justify-end">
+
+                    <button type="submit"
+                        onclick="this.disabled=true; this.innerText='Menyimpan...'; this.form.submit();"
+                        class="rounded-2xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 hover:shadow-md transition duration-200">
+
+                        Simpan Perubahan
+
+                    </button>
+
+                </div>
 
             </div>
 
@@ -117,9 +222,11 @@
 <script>
 function previewImage(e){
     const reader = new FileReader();
+
     reader.onload = function(){
         document.getElementById('preview').src = reader.result;
     }
+
     reader.readAsDataURL(e.target.files[0]);
 }
 </script>

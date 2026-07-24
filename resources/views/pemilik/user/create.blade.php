@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title','Tambah Anggota')
+@section('title','Tambah Petugas')
 
 @section('content')
 
@@ -9,10 +9,10 @@
     {{-- HEADER --}}
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-semibold text-slate-700">
-            Tambah Anggota
+            Tambah Petugas
         </h2>
 
-        <a href="{{ route('petugas.user.index') }}"
+        <a href="{{ route('pemilik.user.index') }}"
            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm">
             ← Kembali
         </a>
@@ -33,7 +33,7 @@
             </div>
         @endif
 
-        <form action="{{ route('petugas.user.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+        <form action="{{ route('pemilik.user.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
 
             {{-- DATA UTAMA --}}
@@ -144,7 +144,7 @@
 
                 <button type="submit"
                     class="px-5 py-2 bg-blue-600 text-white cursor-pointer rounded-lg hover:bg-blue-700 transition text-sm">
-                    Simpan Anggota
+                    Simpan Petugas
                 </button>
 
             </div>

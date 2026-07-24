@@ -8,12 +8,12 @@
 <div class="no-print mb-4 flex justify-between max-w-4xl mx-auto">
 
     <a href="{{ url()->previous() }}"
-       class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+       class="px-4 py-2 text-white bg-blue-600 cursor-pointer rounded-lg hover:bg-blue-700">
         ← Kembali
     </a>
 
     <button onclick="window.print()"
-        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+        class="px-4 py-2 bg-indigo-600 text-white cursor-pointer rounded-lg hover:bg-indigo-700">
         🖨️ Cetak
     </button>
 
@@ -117,7 +117,7 @@
         <div class="bg-gray-50 rounded-lg p-3 space-y-2 text-sm">
             @foreach($transaksi->kerusakan as $k)
             <div class="flex justify-between">
-                <span>{{ $k->barang->nama_barang }} ({{ $k->qty }})</span>
+                <span>{{ $k->barang->nama_barang }} ({{ $k->qty }} {{ $k->jenis_kerusakan }})</span>
                 <span class="text-red-500">
                     Rp {{ number_format($k->total_denda,0,',','.') }}
                 </span>

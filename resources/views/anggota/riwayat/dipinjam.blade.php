@@ -3,90 +3,136 @@
 
 @section('content')
 
-<div class="max-w-6xl mx-auto">
+<div class="max-w-7xl mx-auto">
 
     {{-- HEADER --}}
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-semibold text-slate-700">
+    <div class="mb-8">
+
+        <h2 class="text-3xl font-bold tracking-tight text-slate-800">
             Transaksi Dipinjam
         </h2>
+
+        <p class="text-sm text-slate-500 mt-1">
+            Daftar transaksi yang sedang dipinjam
+        </p>
+
     </div>
 
-    {{-- CARD --}}
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    {{-- TABLE --}}
+    <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
 
         <div class="overflow-x-auto">
+
             <table class="w-full text-sm">
 
-                {{-- HEADER --}}
-                <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+                {{-- HEAD --}}
+                <thead class="bg-slate-50 text-slate-500 uppercase text-xs tracking-wider">
+
                     <tr>
-                        <th class="px-6 py-3 text-left w-16">No</th>
-                        <th class="px-6 py-3 text-left">Nama User</th>
-                        <th class="px-6 py-3 text-left w-40">Tanggal Sewa</th>
-                        <th class="px-6 py-3 text-left w-40">Rencana Kembali</th>
-                        <th class="px-6 py-3 text-center w-32">Total</th>
-                        <th class="px-6 py-3 text-center w-32">Aksi</th>
+                        <th class="px-6 py-4 text-left font-semibold w-16">No</th>
+                        <th class="px-6 py-4 text-left font-semibold">Nama User</th>
+                        <th class="px-6 py-4 text-left font-semibold">Tanggal Sewa</th>
+                        <th class="px-6 py-4 text-left font-semibold">Rencana Kembali</th>
+                        <th class="px-6 py-4 text-center font-semibold">Total</th>
+                        <th class="px-6 py-4 text-center font-semibold">Aksi</th>
                     </tr>
+
                 </thead>
 
                 {{-- BODY --}}
-                <tbody>
+                <tbody class="divide-y divide-slate-100">
+
                     @forelse($data as $d)
 
-                    <tr class="border-t hover:bg-slate-50 transition">
+                    <tr class="hover:bg-slate-50/70 transition duration-200">
 
                         {{-- NOMOR --}}
-                        <td class="px-6 py-4 font-medium">
+                        <td class="px-6 py-5 text-slate-500 font-medium">
                             {{ ($data->currentPage() - 1) * $data->perPage() + $loop->iteration }}
                         </td>
 
                         {{-- NAMA --}}
-                        <td class="px-6 py-4">
-                            {{ $d->user->name }}
+                        <td class="px-6 py-5">
+
+                            <div class="flex items-center gap-3">
+
+                                <div class="h-11 w-11 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-600 font-semibold">
+                                    {{ strtoupper(substr($d->user->name,0,1)) }}
+                                </div>
+
+                                <div class="font-semibold text-slate-700">
+                                    {{ $d->user->name }}
+                                </div>
+
+                            </div>
+
                         </td>
 
                         {{-- TANGGAL PINJAM --}}
-                        <td class="px-6 py-4">
+                        <td class="px-6 py-5 text-slate-600">
                             {{ \Carbon\Carbon::parse($d->tanggal_pinjam)->translatedFormat('d F Y') }}
                         </td>
 
                         {{-- TANGGAL KEMBALI --}}
-                        <td class="px-6 py-4">
+                        <td class="px-6 py-5 text-slate-600">
                             {{ \Carbon\Carbon::parse($d->tanggal_kembali_rencana)->translatedFormat('d F Y') }}
                         </td>
 
                         {{-- TOTAL --}}
-                        <td class="px-6 py-4 text-center font-semibold text-slate-700">
-                            Rp {{ number_format($d->total_harga,0,',','.') }}
+                        <td class="px-6 py-5 text-center">
+
+                            <span class="inline-block rounded-xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
+                                Rp {{ number_format($d->total_harga,0,',','.') }}
+                            </span>
+
                         </td>
 
                         {{-- AKSI --}}
-                        <td class="px-6 py-4 text-center">
+                        <td class="px-6 py-5 text-center">
+
                             <a href="{{ route('anggota.riwayat.detail', $d->id) }}"
-                               class="px-3 py-1 text-xs bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+                               class="inline-block rounded-xl bg-blue-500 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-600 shadow-sm transition">
                                 Detail
                             </a>
+
                         </td>
 
                     </tr>
 
                     @empty
+
                     <tr>
-                        <td colspan="6" class="text-center py-10 text-slate-400">
-                            Tidak ada transaksi yang sedang dipinjam
+
+                        <td colspan="6" class="py-16 text-center">
+
+                            <div class="flex flex-col items-center justify-center text-slate-400">
+
+                                <div class="mb-3 text-5xl">
+                                    📦
+                                </div>
+
+                                <p class="text-sm font-medium">
+                                    Tidak ada transaksi yang sedang dipinjam
+                                </p>
+
+                            </div>
+
                         </td>
+
                     </tr>
+
                     @endforelse
+
                 </tbody>
 
             </table>
+
         </div>
 
     </div>
 
     {{-- PAGINATION --}}
-    <div class="mt-4">
+    <div class="mt-6">
         {{ $data->links() }}
     </div>
 

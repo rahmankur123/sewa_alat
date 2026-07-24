@@ -16,6 +16,7 @@ use App\Models\Kerusakan;
 use App\Models\Keterlambatan;
 use App\Models\BarangHilang;
 use DB;
+use Carbon\Carbon;
 
 class TransaksiController extends Controller
 {
@@ -29,8 +30,8 @@ class TransaksiController extends Controller
     // FORM CREATE
     public function create()
     {
-        $barang = Barang::all();
-        $users = User::where('role','anggota')->where('status','aktif')->get();
+        $barang = Barang::where('stok', '>', 0)->get();
+        $users = User::where('role','anggota')->get();
         return view('petugas.transaksi.create', compact('barang','users'));
     }
 
@@ -61,23 +62,8 @@ class TransaksiController extends Controller
     $transaksi = DB::transaction(function() use ($request){
 
         // ================== HANDLE USER ==================
-        if($request->user_id){
-            $user = User::findOrFail($request->user_id);
-        } else {
-
-            $password = Str::random(8);
-
-            $user = User::create([
-                'name' => 'User Baru',
-                'email' => $request->email,
-                'password' => Hash::make($password),
-                'role' => 'anggota',
-                'status' => 'belum_aktif',
-                'alamat' => '-',
-                'token_aktivasi' => Str::random(40)
-            ]);
-        }
-
+        
+          $user = User::findOrFail($request->user_id);
         // ================== HITUNG DURASI ==================
         $durasi = $request->durasi 
             ?? \Carbon\Carbon::parse($request->tanggal_pinjam)
@@ -125,18 +111,6 @@ class TransaksiController extends Controller
 
         // ================== LOAD RELASI (BIAR LANGSUNG KE VIEW) ==================
         $transaksi->load(['user','detail.barang']);
-
-        // ================== EMAIL ==================
-        try {
-            $isBaru = $user->status === 'belum_aktif';
-
-            Mail::to($user->email)
-                ->send(new TransaksiMail($transaksi, $user, $isBaru));
-
-        } catch (\Exception $e) {
-            \Log::error('Gagal kirim email: '.$e->getMessage());
-        }
-
         return $transaksi;
     });
 
@@ -168,115 +142,169 @@ public function formKembalikan($id)
 }
 
 
-public function prosesKembalikan(Request $request,$id)
+public function prosesKembalikan(Request $request, $id)
 {
     $transaksi = Transaksi::with('detail.barang')->findOrFail($id);
 
-    $tanggal_real = $request->tanggal_kembali_real;
-    $tanggal_rencana = $transaksi->tanggal_kembali_rencana;
+    $request->validate([
+        'tanggal_kembali_real' => 'required|date',
+    ]);
 
-    $total_denda = 0;
+    DB::beginTransaction();
 
-    // ================== BARANG HILANG ==================
-if($request->hilang){
-    foreach($request->hilang as $barang_id => $qty_hilang){
+    try {
+        // ==============================
+        // UPDATE TANGGAL KEMBALI
+        // ==============================
+        $transaksi->tanggal_kembali_real = $request->tanggal_kembali_real;
+        $transaksi->save();
 
-        if($qty_hilang > 0){
+        // ==============================
+        // HAPUS DATA LAMA (jika edit)
+        // ==============================
+        Kerusakan::where('transaksi_id', $transaksi->id)->delete();
+        BarangHilang::where('transaksi_id', $transaksi->id)->delete();
 
-            $barang = Barang::find($barang_id);
+        // ==============================
+        // PROSES KERUSAKAN
+        // ==============================
+        $totalRusakPerBarang = [];
 
-            $denda = $barang->denda_hilang * $qty_hilang;
+        if ($request->has('rusak')) {
+            foreach ($request->rusak as $barangId => $items) {
 
-            $total_denda += $denda;
+                foreach ($items as $jenis) {
+                    if (!$jenis) {
+                continue;
+            }
 
-            BarangHilang::create([
-                'transaksi_id' => $transaksi->id,
-                'barang_id' => $barang_id,
-                'qty' => $qty_hilang,
-                'denda' => $denda
-            ]);
+                    $barang = Barang::findOrFail($barangId);
+
+                    // Ringan = harga_kerusakan
+                    // Berat = harga barang (ganti penuh)
+                    $denda = $jenis === 'berat'
+                        ? $barang->denda_hilang
+                        : $barang->denda_kerusakan;
+
+                    Kerusakan::create([
+                        'transaksi_id'    => $transaksi->id,
+                        'barang_id'       => $barangId,
+                        'qty'          => 1,
+                        'jenis_kerusakan' => $jenis,
+                        'total_denda'     => $denda,
+                    ]);
+
+                    if (!isset($totalRusakPerBarang[$barangId])) {
+                        $totalRusakPerBarang[$barangId] = 0;
+                    }
+
+                    $totalRusakPerBarang[$barangId]++;
+                }
+            }
         }
-    }
-}
 
-    // cek keterlambatan
-if($tanggal_real > $tanggal_rencana){
+        // ==============================
+        // PROSES BARANG HILANG
+        // ==============================
+        if ($request->has('hilang')) {
+            foreach ($request->hilang as $barangId => $qty) {
 
-    $hari_telat = \Carbon\Carbon::parse($tanggal_rencana)
-                    ->diffInDays($tanggal_real);
+                $qty = (int) $qty;
 
-    foreach($transaksi->detail as $detail){
+                if ($qty <= 0) {
+                    continue;
+                }
 
-        $barang = $detail->barang;
+                // Cari qty yang dipinjam
+                $detail = $transaksi->detail
+                    ->where('barang_id', $barangId)
+                    ->first();
 
-        $denda_telat = $hari_telat * $barang->denda_keterlambatan_per_hari * $detail->qty;
+                if (!$detail) {
+                    continue;
+                }
 
-        $total_denda += $denda_telat;
+                $qtyDipinjam = $detail->qty;
+                $qtyRusak = $totalRusakPerBarang[$barangId] ?? 0;
+                $maksHilang = $qtyDipinjam - $qtyRusak;
 
-        Keterlambatan::create([
-            'transaksi_id' => $transaksi->id,
-            'barang_id' => $barang->id,
-            'qty' => $detail->qty,
-            'total_denda' => $denda_telat,
-            'durasi_hari' => \Carbon\Carbon::parse($transaksi->tanggal_kembali_rencana)
-                            ->diffInDays($tanggal_real)
-        ]);
-    }
-}
+                // Validasi agar tidak melebihi sisa unit
+                if ($qty > $maksHilang) {
+                    throw new \Exception(
+                        "Jumlah barang hilang untuk {$detail->barang->nama_barang} melebihi batas maksimal {$maksHilang} unit."
+                    );
+                }
 
-    // cek kerusakan
-    if($request->rusak){
-    foreach($request->rusak as $barang_id => $data){
+                $barang = Barang::findOrFail($barangId);
 
-        $qty_rusak = count($data); // hitung jumlah rusak
-
-        if($qty_rusak > 0){
-
-            $barang = Barang::find($barang_id);
-
-            $denda = $barang->denda_kerusakan * $qty_rusak;
-
-            $total_denda += $denda;
-
-            Kerusakan::create([
-                'transaksi_id' => $transaksi->id,
-                'barang_id' => $barang_id,
-                'qty' => $qty_rusak,
-                'total_denda' => $denda
-            ]);
+                BarangHilang::create([
+                    'transaksi_id' => $transaksi->id,
+                    'barang_id'    => $barangId,
+                    'qty'          => $qty,
+                    'denda'        => ($barang->denda_hilang ?? 0) * $qty,
+                ]);
+            }
         }
-    }
+
+        // ==============================
+        // PROSES DENDA KETERLAMBATAN
+        // ==============================
+        if (
+            $transaksi->tanggal_kembali_real >
+            $transaksi->tanggal_kembali_rencana
+        ) {
+            $hari = Carbon::parse(
+    $transaksi->tanggal_kembali_rencana
+)->diffInDays(
+    Carbon::parse(
+        $transaksi->tanggal_kembali_real
+    )
+);
+ // Ambil barang pertama dari transaksi
+$barangPertama = $transaksi->detail->first();
+
+$dendaPerHari = 0;
+
+if ($barangPertama && $barangPertama->barang) {
+    $dendaPerHari = $barangPertama->barang->denda_keterlambatan_per_hari;
 }
-// kembalikan stok
-foreach($transaksi->detail as $detail){
 
-    $barang = $detail->barang;
-    $hilangData = $request->hilang ?? [];
+Keterlambatan::create([
+    'transaksi_id' => $transaksi->id,
+    'barang_id'    => $barangPertama?->barang_id,
+    'qty'          => 1,
+    'durasi_hari'  => $hari,
+    'total_denda'  => $hari * $dendaPerHari,
+]);
+        }
 
-    $qty_hilang = $hilangData[$barang->id] ?? 0;
+        // ==============================
+        // UPDATE STATUS
+        // ==============================
+        $adaKerusakan = Kerusakan::where('transaksi_id', $transaksi->id)->exists();
+        $adaHilang = BarangHilang::where('transaksi_id', $transaksi->id)->exists();
+        $adaTerlambat = Keterlambatan::where('transaksi_id', $transaksi->id)->exists();
 
-    $qty_kembali = $detail->qty - $qty_hilang;
+        if ($adaKerusakan || $adaHilang || $adaTerlambat) {
+            $transaksi->status_transaksi = 'terdenda';
+        } else {
+            $transaksi->status_transaksi = 'selesai';
+        }
 
-    if($qty_kembali > 0){
-        $barang->increment('stok', $qty_kembali);
+        $transaksi->save();
+
+        DB::commit();
+
+        return redirect()
+            ->route('petugas.transaksi.dipinjam')
+            ->with('success', 'Pengembalian berhasil diproses.');
+    } catch (\Exception $e) {
+        DB::rollBack();
+
+        return back()
+            ->withInput()
+            ->with('error', $e->getMessage());
     }
-}
-    // update transaksi
-    $transaksi->tanggal_kembali_real = $tanggal_real;
-    $transaksi->total_denda = $total_denda;
-
-    if($total_denda > 0){
-        $transaksi->status_transaksi = 'terdenda';
-        $transaksi->status_pembayaran = 'belum_bayar';
-    }else{
-        $transaksi->status_transaksi = 'selesai';
-        $transaksi->status_pembayaran = 'lunas';
-    }
-
-    $transaksi->save();
-
-    return redirect()->route('petugas.transaksi.dipinjam')
-        ->with('success','Pengembalian berhasil');
 }
 
 public function detail($id)
@@ -389,26 +417,143 @@ public function tersewa(Request $request)
     return view('petugas.transaksi.tersewa', compact('data'));
 }
 
-public function diambil($id)
+public function ProsesAmbil($id)
 {
-    $transaksi = Transaksi::with('detail.barang')->findOrFail($id);
+    $transaksi = Transaksi::with([
+        'user',
+        'detail.barang'
+    ])->findOrFail($id);
 
-    // ubah status
-    $transaksi->update([
-        'status_transaksi' => 'dipinjam'
-    ]);
+    $barang = Barang::all();
 
-    // kurangi stok barang
-    foreach($transaksi->detail as $detail){
-
-        $detail->barang->decrement('stok', $detail->qty);
-
-    }
-
-    return redirect()->route('petugas.transaksi.tersewa')
-        ->with('success','Status transaksi diupdate & stok berkurang');
+    return view(
+        'petugas.transaksi.pengambilan',
+        compact('transaksi','barang')
+    );
 }
 
+public function diambil(Request $request, $id)
+{
+    $request->validate([
+        'tanggal_pinjam' => 'required|date',
+        'tanggal_kembali_rencana' => 'required|date',
+        'barang_id' => 'required|array',
+        'qty' => 'required|array',
+    ]);
+
+    DB::beginTransaction();
+
+    try{
+
+        $transaksi = Transaksi::with('detail.barang')
+            ->findOrFail($id);
+
+        // ==========================
+        // Kembalikan stok lama
+        // ==========================
+
+        foreach($transaksi->detail as $detail){
+
+            $detail->barang->increment('stok',$detail->qty);
+
+        }
+
+        // ==========================
+        // Hapus detail lama
+        // ==========================
+
+        $transaksi->detail()->delete();
+
+        // ==========================
+        // Update tanggal
+        // ==========================
+
+        $transaksi->tanggal_pinjam = $request->tanggal_pinjam;
+
+        $transaksi->tanggal_kembali_rencana =
+            $request->tanggal_kembali_rencana;
+
+        $transaksi->total_harga = 0;
+
+        $transaksi->save();
+
+        // ==========================
+        // Hitung durasi
+        // ==========================
+
+        $durasi = Carbon::parse($request->tanggal_pinjam)
+            ->diffInDays($request->tanggal_kembali_rencana);
+
+        if($durasi <= 0){
+            $durasi = 1;
+        }
+
+        $total = 0;
+
+        // ==========================
+        // Simpan detail baru
+        // ==========================
+
+        foreach($request->barang_id as $i=>$barangId){
+
+            $barang = Barang::findOrFail($barangId);
+
+            $qty = (int)$request->qty[$i];
+
+            $subtotal =
+                $barang->harga_per_hari *
+                $qty *
+                $durasi;
+
+            DetailTransaksi::create([
+
+                'transaksi_id'=>$transaksi->id,
+
+                'barang_id'=>$barangId,
+
+                'qty'=>$qty,
+
+                'harga_per_hari'=>$barang->harga_per_hari,
+
+                'subtotal'=>$subtotal
+
+            ]);
+
+            $barang->decrement('stok',$qty);
+
+            $total += $subtotal;
+
+        }
+
+        // ==========================
+        // Update transaksi
+        // ==========================
+
+        $transaksi->update([
+
+            'total_harga'=>$total,
+
+            'status_transaksi'=>'dipinjam'
+
+        ]);
+
+        DB::commit();
+
+        return redirect()
+            ->route('petugas.transaksi.dipinjam')
+            ->with('success',
+                'Barang berhasil diserahkan kepada penyewa.');
+
+    }catch(\Exception $e){
+
+        DB::rollBack();
+
+        return back()
+            ->withInput()
+            ->with('error',$e->getMessage());
+
+    }
+}
 
 public function hapus($id)
 {

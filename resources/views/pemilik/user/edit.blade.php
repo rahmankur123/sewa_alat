@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title','Detail Anggota')
+@section('title','Detail Petugas')
 
 @section('content')
 
@@ -14,11 +14,11 @@
 
         <div>
             <h1 class="text-3xl font-black text-slate-800 tracking-tight">
-                Detail Anggota
+                Detail Petugas
             </h1>
 
             <p class="text-sm text-slate-500 mt-1">
-                Informasi lengkap data anggota
+                Informasi lengkap data Petugas
             </p>
         </div>
 
@@ -28,14 +28,14 @@
             <button
                 @click="editMode = !editMode"
                 type="button"
-                class="px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm transition
+                class="px-5 py-2.5 rounded-xl cursor-pointer font-bold text-sm shadow-sm transition
                        bg-amber-500 hover:bg-amber-600 text-white"
             >
                 <span x-text="editMode ? 'Batal Edit' : 'Edit Data'"></span>
             </button>
 
             {{-- BACK --}}
-            <a href="{{ route('petugas.user.index') }}"
+            <a href="{{ route('pemilik.user.index') }}"
                class="px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm transition
                       bg-slate-700 hover:bg-slate-800 text-white">
                 ← Kembali
@@ -63,7 +63,7 @@
 
 
     <form
-        action="{{ route('petugas.user.update',$user->id) }}"
+        action="{{ route('pemilik.user.update',$user->id) }}"
         method="POST"
         enctype="multipart/form-data"
     >

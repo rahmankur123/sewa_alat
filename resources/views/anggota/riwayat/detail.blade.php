@@ -8,7 +8,7 @@
 
 {{-- KEMBALI --}}
 <a href="{{ url()->previous() }}"
-   class="inline-flex items-center gap-2 mb-4 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition">
+   class="inline-flex cursor-pointer items-center gap-2 mb-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
     ← Kembali
 </a>
 

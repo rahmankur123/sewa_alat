@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Petugas;
+namespace App\Http\Controllers\Pemilik;
 
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\RoleMiddleware;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -11,12 +10,15 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\Transaksi;
 use DB;
 
-class UserController extends Controller
+class PetugasController extends Controller
 {
     // ================= LIST USER =================
     public function index(Request $request)
     {
-        $query = User::where('role', 'anggota');
+        $query = User::where(function($q) {
+            $q->where('role', 'petugas')
+              ->orWhere('role', 'pemilik');
+        });
 
         if ($request->search) {
             $query->where('name', 'like', "%{$request->search}%");
@@ -24,13 +26,13 @@ class UserController extends Controller
 
         $users = $query->latest()->paginate(12);
 
-        return view('petugas.user.index', compact('users'));
+        return view('pemilik.user.index', compact('users'));
     }
 
     // ================= FORM TAMBAH =================
     public function create()
     {
-        return view('petugas.user.create');
+        return view('pemilik.user.create');
     }
 
     // ================= SIMPAN =================
@@ -49,7 +51,7 @@ class UserController extends Controller
         $data = $request->only(['name','email','alamat','no_hp','role']);
 
         // default role
-        $data['role'] = $request->role ?? 'anggota';
+        $data['role'] = $request->role ?? 'petugas';
 
         // hash password
         $data['password'] = Hash::make($request->password);
@@ -68,7 +70,7 @@ class UserController extends Controller
     public function edit($id)
     {
         $user = User::findOrFail($id);
-        return view('petugas.user.edit', compact('user'));
+        return view('pemilik.user.edit', compact('user'));
     }
 
     // ================= UPDATE =================
