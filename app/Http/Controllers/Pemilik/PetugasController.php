@@ -104,7 +104,7 @@ class PetugasController extends Controller
 
         $user->update($data);
 
-        return redirect()->route('user.index')->with('success', 'User berhasil diupdate');
+        return redirect()->route('pemilik.user.index')->with('success', 'User berhasil diupdate');
     }
 
     // ================= HAPUS =================
