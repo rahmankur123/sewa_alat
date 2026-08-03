@@ -27,7 +27,7 @@ class UserController extends Controller
         return view('petugas.user.index', compact('users'));
     }
 
-    // ================= FORM TAMBAH =================
+    // ================= FORM TAMBAH ==================
     public function create()
     {
         return view('petugas.user.create');
