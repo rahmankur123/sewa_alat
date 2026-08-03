@@ -61,7 +61,7 @@ class UserController extends Controller
 
         User::create($data);
 
-        return redirect()->route('user.index')->with('success', 'User berhasil ditambahkan');
+        return redirect()->route('petugas.user.index')->with('success', 'User berhasil ditambahkan');
     }
 
     // ================= EDIT =================
